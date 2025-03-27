@@ -1,5 +1,6 @@
 from typing import Annotated
 from datetime import timedelta, datetime, timezone
+import os
 
 from fastapi import Depends, HTTPException
 from starlette import status
@@ -20,9 +21,11 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 驗證 token
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-# JWT
-SECRET_KEY = '6d37c5f0c960ab90586229185806e6b7d28dbadcd0e3a2ef83024dd2b29ab73b'
-ALGORITHM = 'HS256'
+from llm.utils.dotenv import *
+
+### JWT settings ###
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("JWT_ALGORITHM")
 
 # send request 之前只執行 yield 之前的程式碼
 # 發送之後執行 yield 之後的程式碼
