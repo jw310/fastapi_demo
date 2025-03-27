@@ -1,0 +1,123 @@
+[project]
+name = "fastapi-demo"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "jerry",email = "10166007@ntub.edu.tw"}
+]
+readme = "README.md"
+requires-python = "^3.13"
+dependencies = [
+    "fastapi (>=0.115.12,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "jinja2 (>=3.1.6,<4.0.0)",
+    "sqlalchemy (>=2.0.39,<3.0.0)",
+    "passlib (>=1.7.4,<2.0.0)",
+    "python-jose (>=3.4.0,<4.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "bcrypt (>=4.3.0,<5.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# [tool.ruff]
+# # 目標 Python 版本（FastAPI 通常建議使用 3.10 或更高版本）
+# target-version = "py310"
+
+# # 最大行長度（FastAPI 文件風格建議）
+# line-length = 120
+
+# # 需要檢查的目錄
+# include = [
+#     "src",       # 主要程式碼目錄
+#     "app",       # FastAPI 應用程式目錄
+#     "tests"      # 測試目錄
+# ]
+
+# # 排除不需要檢查的目錄
+# exclude = [
+#     ".git",
+#     ".mypy_cache",
+#     ".ruff_cache",
+#     "venv",
+#     "build",
+#     "dist"
+# ]
+
+# # 啟用的規則集合（針對 FastAPI 和 Web 應用程式優化）
+# select = [
+#     # 基本錯誤檢查
+#     "E",    # pycodestyle 錯誤
+#     "F",    # Pyflakes 錯誤
+    
+#     # Web 和 FastAPI 相關的規則
+#     "B",    # flake8-bugbear 進階錯誤檢查
+#     "I",    # isort Import 排序
+#     "N",    # pep8-naming 命名規範
+    
+#     # 型別和文件相關
+#     "ANN",  # 型別註解檢查
+#     "D",    # pydocstyle 文件字串檢查
+    
+#     # 安全性檢查（Web 應用特別重要）
+#     "S",    # flake8-bandit 安全性檢查
+    
+#     # 程式碼品質
+#     "C90",  # 複雜度檢查
+#     "UP",   # pyupgrade Python 版本升級建議
+    
+#     # HTTP 和 Web 相關
+#     "HTTP", # HTTP 相關的最佳實踐
+# ]
+
+# # 忽略的特定規則
+# ignore = [
+#     "E501",        # 忽略行長度檢查（因為已經設定 line-length）
+#     "D100",        # 忽略模組級別的文件字串要求
+#     "D103",        # 忽略函數文件字串要求
+#     "ANN101",      # 忽略 self 的型別註解
+#     "ANN102",      # 忽略 cls 的型別註解
+#     "S104",        # 忽略硬編碼的 IP 位址警告（可能在開發環境使用）
+# ]
+
+# # 複雜度配置
+# mccabe.max-complexity = 15  # FastAPI 路由和中介層可能會稍微複雜一些
+
+# # isort 配置（針對 FastAPI 專案）
+# [tool.ruff.isort]
+# known-first-party = ["app"]  # 指定自定義模組
+# known-third-party = [
+#     "fastapi", 
+#     "pydantic", 
+#     "sqlalchemy", 
+#     "alembic"  # 常見的 FastAPI 相關套件
+# ]
+
+# # 不同檔案的特殊規則
+# [tool.ruff.per-file-ignores]
+# "tests/**" = [
+#     "S101",    # 在測試檔案中允許使用 assert
+#     "ANN",     # 測試檔案中可以不強制型別註解
+#     "D",       # 測試檔案可以不需要詳細文件字串
+# ]
+
+# [tool.ruff.format]
+# # 選項有 "single" 和 "double"
+# quote-style = "single"
+
+# # 特定規則配置
+# [tool.ruff.pydocstyle]
+# convention = "google"  # 使用 Google 風格的文件字串
+
+# # 型別註解配置
+# [tool.ruff.flake8-annotations]
+# allow-star-arg-any = true  # 允許 *args 使用 Any 型別
+# suppress-none-returning = true  # 對於沒有返回值的函數不強制要求返回型別
+
+# # HTTP 相關最佳實踐
+# [tool.ruff.flake8-http]
+# allow-common-passwords = false  # 禁止使用常見密碼
