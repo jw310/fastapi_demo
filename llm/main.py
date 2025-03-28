@@ -65,7 +65,7 @@ app.include_router(auth.router)
 
 
 # main.py 執行時 建立 database 及 tables
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 
 ### Middleware API Error 處理 ###

@@ -23,7 +23,7 @@ engine = create_engine(
 )
 
 # 建立 engine
-# engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 # 與資料庫建立 session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
