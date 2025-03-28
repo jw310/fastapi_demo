@@ -64,6 +64,7 @@ def render_register_page(request: Request):
 
 ### Endpoints ###
 @router.post("/", status_code=status.HTTP_201_CREATED)
+# 寫邏輯跟資料庫操作函數
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
     create_user_model = Users(
         email=create_user_request.email,
