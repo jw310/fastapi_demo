@@ -4,14 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from contextlib import contextmanager
 
-import os
-from llm.utils.dotenv import *
-
-sqlite_path = os.getenv("SQLALCHEMY_SQLITE_DATABASE_URL")
+from llm.env import SQLALCHEMY_DATABASE_URL
 
 # 建立 SQLAlchemy 的 database URL
 # SQLite3
-SQLALCHEMY_DATABASE_URL = sqlite_path
+SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL
 # PostgreSQL
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:5432/TodoApplicationDatabase"
 # MySQL

@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 ### 處理 routers ### .routers 同層的 routers 目錄引入
-from .routes import auth
+from .routes import auths
 
 ### Log 處理 ###
 from .log import init_logging
@@ -39,7 +39,7 @@ from llm.utils.newHTTPException import NewHTTPException
 from .database import engine
 from .models import Base
 
-from llm.utils.dotenv import *
+from llm.env import BASE_DIR
 
 
 # load_dotenv(dotenv_path='.env')
@@ -69,7 +69,7 @@ app.add_middleware(
     CalcApiTimeMiddleware
 )
 
-app.include_router(auth.router)
+app.include_router(auths.router)
 # app.include_router(todos.router)
 # app.include_router(admin.router)
 # app.include_router(users.router)

@@ -11,7 +11,7 @@ from jose import jwt, JWTError
 
 from fastapi.security import OAuth2PasswordBearer
 
-from ..database import SessionLocal
+from ..database import (get_db)
 # 建立 Session 對話
 from sqlalchemy.orm import Session
 from ..models import Users
@@ -21,21 +21,8 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 驗證 token
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-from llm.utils.dotenv import *
+from llm.env import (SECRET_KEY, ALGORITHM)
 
-### JWT settings ###
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("JWT_ALGORITHM")
-
-# send request 之前只執行 yield 之前的程式碼
-# 發送之後執行 yield 之後的程式碼
-def get_db():
-    # 資料庫建立一個本機 session，跟資料庫連線
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # 透過 Depends 注入 db，建立 Session
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
