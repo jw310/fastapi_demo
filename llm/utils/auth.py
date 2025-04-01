@@ -1,6 +1,5 @@
 from typing import Annotated
 from datetime import timedelta, datetime, timezone
-import os
 
 from fastapi import Depends, HTTPException
 from starlette import status
@@ -14,12 +13,13 @@ from fastapi.security import OAuth2PasswordBearer
 from ..database import (get_db)
 # 建立 Session 對話
 from sqlalchemy.orm import Session
-from ..models import Users
 
 # 使用 bcrypt 加密密碼
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 驗證 token
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+
+from llm.models.users import Users
 
 from llm.env import (SECRET_KEY, ALGORITHM)
 

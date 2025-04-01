@@ -9,9 +9,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from ..database import (get_db)
 # 建立 Session 對話
 from sqlalchemy.orm import Session
-from ..models import Users
 
 from llm.utils.auth import authenticate_user, create_access_token, bcrypt_context
+
+from llm.models.users import Users
 
 # 模板
 from fastapi.templating import Jinja2Templates
@@ -53,22 +54,15 @@ def render_register_page(request: Request):
 
 
 ### Endpoints ###
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 # 寫邏輯跟資料庫操作函數
-async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    create_user_model = Users(
-        email=create_user_request.email,
-        username=create_user_request.username,
-        first_name=create_user_request.first_name,
-        last_name=create_user_request.last_name,
-        role=create_user_request.role,
-        hashed_password=bcrypt_context.hash(create_user_request.password),
-        is_active=True,
-        phone_number=create_user_request.phone_number
-    )
+async def create_user(create_user_request: CreateUserRequest):
+    test = await Users.insert_new_user(create_user_request)
+    return {
+        "message": "User created successfully",
+        "data": test
+    }
 
-    db.add(create_user_model)
-    db.commit()
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(

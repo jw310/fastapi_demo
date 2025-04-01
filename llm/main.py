@@ -36,8 +36,8 @@ logger = init_logging()
 from llm.utils.newHTTPException import NewHTTPException
 
 ### 資料庫 ###
-from .database import engine
-from .models import Base
+from .database import Base, engine
+# from .models import Base
 
 from llm.env import BASE_DIR
 
