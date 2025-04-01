@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 ### 處理 routers ### .routers 同層的 routers 目錄引入
-from .routes import auths
+from .routes import auths, users
 
 ### Log 處理 ###
 from .log import init_logging
@@ -70,9 +70,9 @@ app.add_middleware(
 )
 
 app.include_router(auths.router)
+app.include_router(users.router)
 # app.include_router(todos.router)
 # app.include_router(admin.router)
-# app.include_router(users.router)
 
 
 # main.py 執行時 建立 database 及 tables

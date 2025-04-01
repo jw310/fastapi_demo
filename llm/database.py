@@ -41,8 +41,8 @@ engine = create_engine(
 #         )
 
 
-# 建立 engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# 建立 engine echo 在 cmd 上顯示所有執行的過程
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 
 # 與資料庫建立 session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

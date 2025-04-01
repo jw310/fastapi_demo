@@ -26,6 +26,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(String(36), default=str(uuid.uuid4()), unique=True, nullable=False)
     email = Column(String, unique=True,  nullable=False)
     username = Column(String, unique=True, nullable=False)
     first_name = Column(String, nullable=False)
@@ -49,6 +50,13 @@ class CreateUserRequest(BaseModel):
     role: str
     phone_number: str
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+
+
 # 透過 Depends 注入 db，建立 Session
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
 db_dependency = Annotated[Session, Depends(get_db)]
@@ -61,9 +69,7 @@ class UsersTable:
         try:
             # 用 with 管理資源的獲取跟釋放
             with get_db() as db:
-                # user = db.query(User).filter_by(id=id).first()
-                # return UserModel.model_validate(user)
-                create_user_model = Users(
+                create_user_model = User(
                     email=create_user_request.email,
                     username=create_user_request.username,
                     first_name=create_user_request.first_name,
@@ -73,9 +79,9 @@ class UsersTable:
                     is_active=True,
                     phone_number=create_user_request.phone_number
                 )
-
-            db.add(create_user_model)
-            db.commit()
+                # print(create_user_model)
+                db.add(create_user_model)
+                db.commit()
 
         except Exception:
             return None
