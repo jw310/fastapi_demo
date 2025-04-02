@@ -60,4 +60,18 @@ def get_session():
     finally:
         db.close()
 
+# 自定義交易範圍管理器
+@contextmanager
+def transaction_scope():
+    """提供交易範圍的上下文管理器"""
+    db = SessionLocal()
+    try:
+        yield
+        db.commit()
+        # logger.info("Transaction committed successfully")
+    except Exception:
+        db.rollback()
+        # logger.error(f"Transaction rolled back due to error: {str(e)}")
+        raise
+
 get_db = contextmanager(get_session)

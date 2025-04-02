@@ -49,3 +49,15 @@ async def create_user(create_user_request: CreateUserRequest):
     return {
         "message": "User created successfully",
     }
+
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+async def get_user_by_id(user_id: int):
+    user = await Users.get_user_by_id(user_id)
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return {
+        "message": "Success",
+        "user": user
+    }
