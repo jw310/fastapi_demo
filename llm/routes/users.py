@@ -40,8 +40,8 @@ def render_register_page(request: Request):
 
 
 ### Endpoints ###
-@router.get("/", status_code=status.HTTP_200_OK)
-async def get_users():
+@router.get("/all", status_code=status.HTTP_200_OK)
+async def get_all_users():
     users = await Users.get_users()
 
     if users is None:
@@ -61,6 +61,18 @@ async def create_user(create_user_request: CreateUserRequest):
         "message": "User created successfully",
     }
 
+@router.get("/username", status_code=status.HTTP_200_OK)
+async def get_user_by_username(username: str):
+    user = await Users.get_user_by_username(username)
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return {
+        "message": "Success",
+        "user": user
+    }
+
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user_by_id(user_id: int):
     user = await Users.get_user_by_id(user_id)
@@ -72,3 +84,4 @@ async def get_user_by_id(user_id: int):
         "message": "Success",
         "user": user
     }
+

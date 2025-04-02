@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from llm.utils.auth import authenticate_user, create_access_token, bcrypt_context
 
-from llm.models.users import (Users, CreateUserRequest, Token)
+from llm.models.auths import (Token)
 
 # 模板
 from fastapi.templating import Jinja2Templates
@@ -31,17 +31,6 @@ templates = Jinja2Templates(directory="llm/templates")
 
 
 ### Endpoints ###
-# @router.post("/", status_code=status.HTTP_201_CREATED)
-# # 寫邏輯跟資料庫操作函數
-# async def create_user(create_user_request: CreateUserRequest):
-#     user = await Users.insert_new_user(create_user_request)
-#     # print(user)
-
-#     return {
-#         "message": "User created successfully",
-#     }
-
-
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
