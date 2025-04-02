@@ -105,8 +105,52 @@ class UsersTable:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database error: {str(e)}"
         )
-            # return e
 
+        except Exception as e:
+            raise NewHTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
+                msg=str(e)
+            )
+
+
+    async def get_users(self):
+        try:
+            with get_db() as db:
+                query = text("SELECT * FROM users")
+                result = db.execute(query)
+                # sqlalchemy Object 需要轉成 dict
+
+                if result is None:
+                    return None
+
+            users = [{
+                        "id": row.id,
+                        "uuid": row.uuid,
+                        "email": row.email,
+                        "username": row.username,
+                        "first_name": row.first_name,
+                        "last_name": row.last_name,
+                        "role": row.role,
+                        "phone_number": row.phone_number
+                        } for row in result
+                    ]
+
+            return users
+
+        except SQLAlchemyError as e:
+            raise NewHTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+                msg=str(e)
+            )
+
+        except Exception as e:
+            raise NewHTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
+                msg=str(e)
+            )
 
     async def get_user_by_id(self, user_id):
         try:

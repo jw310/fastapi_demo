@@ -40,8 +40,19 @@ def render_register_page(request: Request):
 
 
 ### Endpoints ###
+@router.get("/", status_code=status.HTTP_200_OK)
+async def get_users():
+    users = await Users.get_users()
+
+    if users is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return {
+        "message": "Success",
+        "users": users
+    }
+
 @router.post("/create", status_code=status.HTTP_201_CREATED)
-# 寫邏輯跟資料庫操作函數
 async def create_user(create_user_request: CreateUserRequest):
     user = await Users.insert_new_user(create_user_request)
     # print(user)
