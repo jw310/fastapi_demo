@@ -30,7 +30,9 @@ db_dependency = Annotated[Session, Depends(get_db)]
 templates = Jinja2Templates(directory="llm/templates")
 
 
+#################
 ### Endpoints ###
+#################
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],

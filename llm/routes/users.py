@@ -28,8 +28,9 @@ db_dependency = Annotated[Session, Depends(get_db)]
 # 建立模板
 templates = Jinja2Templates(directory="llm/templates")
 
+#################
 ### Pages ###
-
+#################
 @router.get("/login-page")
 def render_login_page(request: Request):
     return templates.TemplateResponse('login.html', {'request': request})
@@ -38,8 +39,9 @@ def render_login_page(request: Request):
 def render_register_page(request: Request):
     return templates.TemplateResponse('register.html', {'request': request})
 
-
+#################
 ### Endpoints ###
+#################
 @router.get("/all", status_code=status.HTTP_200_OK)
 async def get_all_users():
     users = await Users.get_users()
