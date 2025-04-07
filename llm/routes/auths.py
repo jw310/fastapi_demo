@@ -36,13 +36,12 @@ templates = Jinja2Templates(directory="llm/templates")
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-        db: db_dependency
+        # db: db_dependency
     ):
-
-    user = authenticate_user(form_data.username, form_data.password, db)
+    user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
-    token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
+    token = await create_access_token(user['username'], user['id'], user['role'], timedelta(minutes=20))
     return {
         'access_token': token,
         'token_type': 'bearer'

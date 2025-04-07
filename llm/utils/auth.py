@@ -29,17 +29,18 @@ from llm.env import (SECRET_KEY, ALGORITHM)
 db_dependency = Annotated[Session, Depends(get_db)]
 
 # 身分驗證
-def authenticate_user(username: str, password: str, db):
-    user = db.query(Users).filter(Users.username == username).first()
+async def authenticate_user(username: str, password: str):
+    # user = db.query(Users).filter(Users.username == username).first()
+    user = await Users.get_user_by_username(username)
     if not user:
         return False
-    # bcrypt 會自動將 password 加密後比對
-    if not bcrypt_context.verify(password, user.hashed_password):
+    # # bcrypt 會自動將 password 加密後比對
+    if not bcrypt_context.verify(password, user['hashed_password']):
         return False
     return user
 
 # 建立 JWT token
-def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
+async def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
     encode = {
         "sub": username,
         "id": user_id,
