@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 from llm.utils.auth import bcrypt_context
 from llm.utils.newHTTPException import NewHTTPException
+from llm.utils.dictAndObejctCovert import (dict_to_object, object_to_dict)
 
 # log = logging.getLogger(__name__)
 # log.setLevel(SRC_LOG_LEVELS["MODELS"])
@@ -155,6 +156,8 @@ class UsersTable:
                     "phone_number": row.phone_number
                 }
 
+                user = dict_to_object(user)
+
                 return user
 
         except SQLAlchemyError as e:
@@ -192,6 +195,8 @@ class UsersTable:
                     "role": row.role,
                     "phone_number": row.phone_number
                 }
+
+                user = dict_to_object(user)
 
                 return user
 

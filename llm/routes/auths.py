@@ -29,6 +29,10 @@ db_dependency = Annotated[Session, Depends(get_db)]
 # 建立模板
 templates = Jinja2Templates(directory="llm/templates")
 
+#################
+### Pages ###
+#################
+
 
 #################
 ### Endpoints ###
@@ -41,7 +45,7 @@ async def login_for_access_token(
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
-    token = await create_access_token(user['username'], user['id'], user['role'], timedelta(minutes=20))
+    token = await create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
     return {
         'access_token': token,
         'token_type': 'bearer'

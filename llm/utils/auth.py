@@ -35,7 +35,7 @@ async def authenticate_user(username: str, password: str):
     if not user:
         return False
     # # bcrypt 會自動將 password 加密後比對
-    if not bcrypt_context.verify(password, user['hashed_password']):
+    if not bcrypt_context.verify(password, user.hashed_password):
         return False
     return user
 

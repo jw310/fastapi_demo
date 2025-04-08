@@ -24,6 +24,13 @@ router = APIRouter(
 
 output_folder = os.path.join(os.getcwd(), 'llm/data/uploadFiles')
 
+
+#################
+### Pages ###
+#################
+
+
+
 #################
 ### Endpoints ###
 #################
