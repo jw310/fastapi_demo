@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from llm.utils.auth import bcrypt_context
 from llm.utils.newHTTPException import NewHTTPException
-from llm.utils.dictAndObejctCovert import (dict_to_object, object_to_dict)
+from llm.utils.dictAndObjectCovert import (dict_to_object, object_to_dict)
 
 # log = logging.getLogger(__name__)
 # log.setLevel(SRC_LOG_LEVELS["MODELS"])
