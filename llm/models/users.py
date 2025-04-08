@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 # 驗證 Request
 from pydantic import BaseModel
 
-from llm.utils.auth import bcrypt_context
+from llm.utils.auth import (bcrypt_context)
 from llm.utils.newHTTPException import NewHTTPException
 from llm.utils.dictAndObjectCovert import (dict_to_object, object_to_dict)
 
@@ -58,7 +58,8 @@ class CreateUserRequest(BaseModel):
 
 # 透過 Depends 注入 db，建立 Session
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
-db_dependency = Annotated[Session, Depends(get_db)]
+# db_dependency = Annotated[Session, Depends(get_db)]
+
 
 class UsersTable:
     # 使用 class 內的函數時，必須加上 self 參數，不然會產生 takes 1 positional argument but 2 were given 錯誤
@@ -82,9 +83,10 @@ class UsersTable:
                 db.commit()
 
         except SQLAlchemyError as e:
-            raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database error: {str(e)}"
+            raise NewHTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
+                msg=str(e)
         )
 
         except Exception as e:

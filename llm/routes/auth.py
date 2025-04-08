@@ -18,8 +18,8 @@ from llm.models.auths import (Token)
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter(
-    prefix="/auths",
-    tags=["auths"],
+    prefix="/auth",
+    tags=["auth"],
 )
 
 # 透過 Depends 注入 db，建立 Session
