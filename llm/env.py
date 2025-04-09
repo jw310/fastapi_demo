@@ -1,4 +1,6 @@
 import os
+import logging
+import sys
 from pathlib import Path
 
 ####################################
@@ -108,24 +110,58 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
 
+
+####################################
+# LOGGING
+####################################
+
+GLOBAL_LOG_LEVEL = os.environ.get("GLOBAL_LOG_LEVEL", "").upper()
+if GLOBAL_LOG_LEVEL in logging.getLevelNamesMapping():
+    logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, force=True)
+else:
+    GLOBAL_LOG_LEVEL = "INFO"
+
+log = logging.getLogger(__name__)
+log.info(f"GLOBAL_LOG_LEVEL: {GLOBAL_LOG_LEVEL}")
+
+# if "cuda_error" in locals():
+#     log.exception(cuda_error)
+#     del cuda_error
+
+log_sources = [
+    "MAIN",
+    "MODELS",
+]
+
+SRC_LOG_LEVELS = {}
+
+for source in log_sources:
+    log_env_var = source + "_LOG_LEVEL"
+    SRC_LOG_LEVELS[source] = os.environ.get(log_env_var, "").upper()
+    if SRC_LOG_LEVELS[source] not in logging.getLevelNamesMapping():
+        SRC_LOG_LEVELS[source] = GLOBAL_LOG_LEVEL
+    log.info(f"{log_env_var}: {SRC_LOG_LEVELS[source]}")
+
+# log.setLevel(SRC_LOG_LEVELS["CONFIG"])
+
 ####################################
 # AUDIT LOGGING
 ####################################
-# ENABLE_AUDIT_LOGS = os.getenv("ENABLE_AUDIT_LOGS", "false").lower() == "true"
-# # Where to store log file
-# AUDIT_LOGS_FILE_PATH = f"{DATA_DIR}/audit.log"
-# # Maximum size of a file before rotating into a new log file
-# AUDIT_LOG_FILE_ROTATION_SIZE = os.getenv("AUDIT_LOG_FILE_ROTATION_SIZE", "10MB")
-# # METADATA | REQUEST | REQUEST_RESPONSE
-# AUDIT_LOG_LEVEL = os.getenv("AUDIT_LOG_LEVEL", "REQUEST_RESPONSE").upper()
-# try:
-#     MAX_BODY_LOG_SIZE = int(os.environ.get("MAX_BODY_LOG_SIZE") or 2048)
-# except ValueError:
-#     MAX_BODY_LOG_SIZE = 2048
+ENABLE_AUDIT_LOGS = os.getenv("ENABLE_AUDIT_LOGS", "false").lower() == "true"
+# Where to store log file
+AUDIT_LOGS_FILE_PATH = f"{DATA_DIR}/audit.log"
+# Maximum size of a file before rotating into a new log file
+AUDIT_LOG_FILE_ROTATION_SIZE = os.getenv("AUDIT_LOG_FILE_ROTATION_SIZE", "10MB")
+# METADATA | REQUEST | REQUEST_RESPONSE
+AUDIT_LOG_LEVEL = os.getenv("AUDIT_LOG_LEVEL", "REQUEST_RESPONSE").upper()
+try:
+    MAX_BODY_LOG_SIZE = int(os.environ.get("MAX_BODY_LOG_SIZE") or 2048)
+except ValueError:
+    MAX_BODY_LOG_SIZE = 2048
 
-# # Comma separated list for urls to exclude from audit
-# AUDIT_EXCLUDED_PATHS = os.getenv("AUDIT_EXCLUDED_PATHS", "/chats,/chat,/folders").split(
-#     ","
-# )
-# AUDIT_EXCLUDED_PATHS = [path.strip() for path in AUDIT_EXCLUDED_PATHS]
-# AUDIT_EXCLUDED_PATHS = [path.lstrip("/") for path in AUDIT_EXCLUDED_PATHS]
+# Comma separated list for urls to exclude from audit
+AUDIT_EXCLUDED_PATHS = os.getenv("AUDIT_EXCLUDED_PATHS", "/chats,/chat,/folders").split(
+    ","
+)
+AUDIT_EXCLUDED_PATHS = [path.strip() for path in AUDIT_EXCLUDED_PATHS]
+AUDIT_EXCLUDED_PATHS = [path.lstrip("/") for path in AUDIT_EXCLUDED_PATHS]

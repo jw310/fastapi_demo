@@ -5,8 +5,9 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from pathlib import Path
 import time
-import os
+import sys
 import uuid
+from contextlib import asynccontextmanager
 
 ### 處理 middleware ###
 from fastapi.middleware import Middleware
@@ -18,6 +19,11 @@ from fastapi.templating import Jinja2Templates
 # # 載入靜態檔案
 from fastapi.staticfiles import StaticFiles
 
+# from llm.env import (
+#     GLOBAL_LOG_LEVEL,
+#     SRC_LOG_LEVELS,
+# )
+from llm.env import *
 
 ### 處理 routers ### .routers 同層的 routers 目錄引入
 from .routes import auth, files, users, admin
@@ -26,7 +32,16 @@ from .routes import auth, files, users, admin
 from .log import init_logging
 # import logging
 
+# from llm.utils import logger
+# from llm.utils.audit import AuditLevel, AuditLoggingMiddleware
+# from llm.utils.logger import start_logger
+# import logging
+
 logger = init_logging()
+
+# logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
+# log = logging.getLogger(__name__)
+# log.setLevel(SRC_LOG_LEVELS["MAIN"])
 
 # 開關 cmd 預設 log 資訊
 # logger_ac = logging.getLogger("uvicorn.access")
@@ -55,6 +70,11 @@ class CalcApiTimeMiddleware(BaseHTTPMiddleware):
 
 app = FastAPI()
 
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     start_logger()
+#     yield
+
 CORS_ALLOW_ORIGINS = ['*']
 
 app.add_middleware(
@@ -69,11 +89,25 @@ app.add_middleware(
     CalcApiTimeMiddleware
 )
 
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(files.router)
-app.include_router(admin.router)
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
+app.include_router(admin.router,   prefix="/api/v1/admin", tags=["admin"])
 # app.include_router(todos.router)
+
+# try:
+#     audit_level = AuditLevel(AUDIT_LOG_LEVEL)
+# except ValueError as e:
+#     logger.error(f"Invalid audit level: {AUDIT_LOG_LEVEL}. Error: {e}")
+#     audit_level = AuditLevel.NONE
+
+# if audit_level != AuditLevel.NONE:
+#     app.add_middleware(
+#         AuditLoggingMiddleware,
+#         audit_level=audit_level,
+#         excluded_paths=AUDIT_EXCLUDED_PATHS,
+#         max_body_size=MAX_BODY_LOG_SIZE,
+#     )
 
 
 # main.py 執行時 建立 database 及 tables
@@ -133,7 +167,9 @@ templates = Jinja2Templates(directory=BASE_DIR / 'templates')
 app.mount('/static', StaticFiles(directory=BASE_DIR / 'static'), name='static')
 
 
-### endpoints ###
+#################
+### Endpoints ###
+#################
 
 # 檢查 app 是否正常啟動
 @app.get('/healthy')

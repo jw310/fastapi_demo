@@ -16,10 +16,7 @@ from llm.models.users import (Users, CreateUserRequest)
 # 模板
 from fastapi.templating import Jinja2Templates
 
-router = APIRouter(
-    prefix="/files",
-    tags=["files"],
-)
+router = APIRouter()
 
 
 output_folder = os.path.join(os.getcwd(), 'llm/data/uploadFiles')
