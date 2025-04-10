@@ -37,17 +37,17 @@ from .database import get_db
 from .routes import auth, files, users, admin
 
 ### Log 處理 ###
-# from .log import init_logging
-# logger = init_logging()
+from .log import init_logging
+log = init_logging()
 
-import logging
-from llm.utils import logger
-from llm.utils.audit import AuditLevel, AuditLoggingMiddleware
-from llm.utils.logger import start_logger
+# import logging
+# from llm.utils import logger
+# from llm.utils.audit import AuditLevel, AuditLoggingMiddleware
+# from llm.utils.logger import start_logger
 
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MAIN"])
+# logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
+# log = logging.getLogger(__name__)
+# log.setLevel(SRC_LOG_LEVELS["MAIN"])
 
 # 開關 cmd 預設 log 資訊
 # logger_ac = logging.getLogger("uvicorn.access")
@@ -67,6 +67,15 @@ from llm.env import BASE_DIR
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
 # db_dependency = Annotated[Session, Depends(get_db)]
 
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     start_logger()
+#     yield
+
+
+##################
+### Middleware ###
+##################
 ### Middleware API 時間計算 ###
 class CalcApiTimeMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
@@ -76,13 +85,8 @@ class CalcApiTimeMiddleware(BaseHTTPMiddleware):
         response.headers["X-Process-Time"] = str(process_time)
         return response
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    start_logger()
-    yield
-
-
-app = FastAPI(lifespan=lifespan,)
+# app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 CORS_ALLOW_ORIGINS = ['*']
 
@@ -98,58 +102,36 @@ app.add_middleware(
     CalcApiTimeMiddleware
 )
 
+# try:
+#     audit_level = AuditLevel(AUDIT_LOG_LEVEL)
+# except ValueError as e:
+#     logger.error(f"Invalid audit level: {AUDIT_LOG_LEVEL}. Error: {e}")
+#     audit_level = AuditLevel.NONE
+
+# if audit_level != AuditLevel.NONE:
+#     app.add_middleware(
+#         AuditLoggingMiddleware,
+#         audit_level=audit_level,
+#         excluded_paths=AUDIT_EXCLUDED_PATHS,
+#         max_body_size=MAX_BODY_LOG_SIZE,
+#     )
+
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
 app.include_router(admin.router,   prefix="/api/v1/admin", tags=["admin"])
 # app.include_router(todos.router)
 
-try:
-    audit_level = AuditLevel(AUDIT_LOG_LEVEL)
-except ValueError as e:
-    logger.error(f"Invalid audit level: {AUDIT_LOG_LEVEL}. Error: {e}")
-    audit_level = AuditLevel.NONE
-
-if audit_level != AuditLevel.NONE:
-    app.add_middleware(
-        AuditLoggingMiddleware,
-        audit_level=audit_level,
-        excluded_paths=AUDIT_EXCLUDED_PATHS,
-        max_body_size=MAX_BODY_LOG_SIZE,
-    )
-
-
-# main.py 執行時 建立 database 及 tables
-Base.metadata.create_all(bind=engine)
 
 # 使用 自定義的 NewHTTPException
 @app.exception_handler(NewHTTPException)
 async def http_exception_handler(request: Request, exc: NewHTTPException):
     print("Error:", exc.msg)   # 紀錄可預期的錯誤的 log
-    # logger.error(exc.msg)
     log.error(exc.msg)
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
     )
-
-### Middleware ###
-
-### API Error 處理 ###
-@app.middleware("http")
-async def get_request(request: Request, call_next):
-    try:
-        response = await call_next(request)
-        if response.status_code < 400:
-            log.info('Info')
-        return response
-    except Exception as e:     # 非預期的錯誤
-        print("Error:", e)     # 紀錄非預期的錯誤的 log
-        log.error('Error:', e)
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "Internal Server Error"},
-        )
 
 ### 每個請求新增唯一的 request ID ###
 # @app.middleware("http")
@@ -170,6 +152,25 @@ async def get_request(request: Request, call_next):
 #         )
 #     return await call_next(request)
 
+### API Error 處理 ###
+# 紀錄非預期的錯誤，但不會回傳詳細資訊給使用者
+@app.middleware("http")
+async def get_request(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        if response.status_code < 400:
+            log.info('Info')
+        return response
+    except Exception as e:     # 非預期的錯誤
+        print("Error:", e)     # 紀錄非預期的錯誤的 log
+        log.error('Error:', e)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal Server Error"},
+        )
+
+# main.py 執行時 建立 database 及 tables
+Base.metadata.create_all(bind=engine)
 
 # 建立 Jinja2 模板引擎
 templates = Jinja2Templates(directory=BASE_DIR / 'templates')
@@ -203,6 +204,8 @@ async def health_check_with_db():
 async def slow_endpoint():
     time.sleep(1)
     return {"message": "Slow endpoint processed"}
+
+
 
 # 在命令列中直接執行 python main.py 來啟動 FastAPI
 if __name__ == '__main__':
