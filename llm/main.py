@@ -67,40 +67,17 @@ from llm.env import BASE_DIR
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
 # db_dependency = Annotated[Session, Depends(get_db)]
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     start_logger()
-#     yield
-
 
 ##################
 ### Middleware ###
 ##################
-### Middleware API 時間計算 ###
-class CalcApiTimeMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        start_time = time.time()
-        response = await call_next(request)
-        process_time = time.time() - start_time
-        response.headers["X-Process-Time"] = str(process_time)
-        return response
-
 # app = FastAPI(lifespan=lifespan)
 app = FastAPI()
 
-CORS_ALLOW_ORIGINS = ['*']
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.add_middleware(
-    CalcApiTimeMiddleware
-)
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     start_logger()
+#     yield
 
 # try:
 #     audit_level = AuditLevel(AUDIT_LOG_LEVEL)
@@ -115,6 +92,30 @@ app.add_middleware(
 #         excluded_paths=AUDIT_EXCLUDED_PATHS,
 #         max_body_size=MAX_BODY_LOG_SIZE,
 #     )
+
+CORS_ALLOW_ORIGINS = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+### Middleware API 時間計算 ###
+class CalcApiTimeMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        start_time = time.time()
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        response.headers["X-Process-Time"] = str(process_time)
+        return response
+
+
+app.add_middleware(
+    CalcApiTimeMiddleware
+)
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
@@ -193,7 +194,7 @@ def health_check():
 @app.get("/healthy/db")
 async def health_check_with_db():
     with get_db() as db:
-        query = text("SELECT * FROM users")
+        query = text("SELECT 1")
         result = db.execute(query)
         if result is None:
             return {"status": False}
