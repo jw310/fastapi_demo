@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 from datetime import timedelta
 
@@ -11,6 +12,11 @@ from llm.models.users import (Users, CreateUserRequest)
 
 # 模板
 from fastapi.templating import Jinja2Templates
+
+from llm.env import SRC_LOG_LEVELS
+
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
 router = APIRouter()
 

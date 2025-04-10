@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from loguru import Record
 
 
+# cmd 輸出的 log 格式
 def stdout_format(record: "Record") -> str:
     """
     Generates a formatted string for log records that are output to the console. This format includes a timestamp, log level, source location (module, function, and line), the log message, and any extra data (serialized as JSON).
@@ -35,7 +36,7 @@ def stdout_format(record: "Record") -> str:
         "\n{exception}"
     )
 
-
+# 取得標準 logging 的訊息，轉交給 loguru
 class InterceptHandler(logging.Handler):
     """
     Intercepts log records from Python's standard logging module
@@ -53,6 +54,7 @@ class InterceptHandler(logging.Handler):
         except ValueError:
             level = record.levelno
 
+        # 找出 log 的呼叫位置
         frame, depth = sys._getframe(6), 6
         while frame and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
@@ -63,6 +65,7 @@ class InterceptHandler(logging.Handler):
         )
 
 
+# 將 audit log 轉換成 json 格式
 def file_format(record: "Record"):
     """
     Formats audit log records into a structured JSON string for file output.
@@ -105,6 +108,7 @@ def start_logger():
     """
     logger.remove()
 
+    # loguru 設定，輸出不是 audit log 的訊息到 console
     logger.add(
         sys.stdout,
         level=GLOBAL_LOG_LEVEL,
@@ -112,6 +116,7 @@ def start_logger():
         filter=lambda record: "auditable" not in record["extra"],
     )
 
+    # loguru 設定，輸出 audit log 的訊息到檔案
     if AUDIT_LOG_LEVEL != "NONE":
         try:
             logger.add(
@@ -125,9 +130,12 @@ def start_logger():
         except Exception as e:
             logger.error(f"Failed to initialize audit log file handler: {str(e)}")
 
+    # 替換標準 logging 的 handler
     logging.basicConfig(
         handlers=[InterceptHandler()], level=GLOBAL_LOG_LEVEL, force=True
     )
+
+    # 設定 uvicorn 的 log 也給 loguru
     for uvicorn_logger_name in ["uvicorn", "uvicorn.error"]:
         uvicorn_logger = logging.getLogger(uvicorn_logger_name)
         uvicorn_logger.setLevel(GLOBAL_LOG_LEVEL)
@@ -137,4 +145,5 @@ def start_logger():
         uvicorn_logger.setLevel(GLOBAL_LOG_LEVEL)
         uvicorn_logger.handlers = [InterceptHandler()]
 
+    # 輸出全域 log 訊息
     logger.info(f"GLOBAL_LOG_LEVEL: {GLOBAL_LOG_LEVEL}")

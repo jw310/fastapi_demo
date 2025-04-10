@@ -13,6 +13,7 @@ from typing import (
 )
 import uuid
 
+# 使用 ASGI 的功能，紀錄 request 和 response 訊息
 from asgiref.typing import (
     ASGI3Application,
     ASGIReceiveCallable,
@@ -24,9 +25,9 @@ from asgiref.typing import (
 from loguru import logger
 from starlette.requests import Request
 
-from open_webui.env import AUDIT_LOG_LEVEL, MAX_BODY_LOG_SIZE
-from open_webui.utils.auth import get_current_user, get_http_authorization_cred
-from open_webui.models.users import UserModel
+from llm.env import AUDIT_LOG_LEVEL, MAX_BODY_LOG_SIZE
+from llm.utils.auth import get_current_user, get_http_authorization_cred
+from llm.models.users import User
 
 
 if TYPE_CHECKING:
@@ -66,6 +67,8 @@ class AuditLogger:
     """
 
     def __init__(self, logger: "Logger"):
+        # auditable 只會被紀錄到設定的 audit log 檔案，
+        # logger.py 內的 filter=lambda record: "auditable" not in record["extra"]
         self.logger = logger.bind(auditable=True)
 
     def write(
@@ -87,7 +90,7 @@ class AuditLogger:
             **entry,
         )
 
-
+# request 的暫存區，儲存容量為 max_body_size
 class AuditContext:
     """
     Captures and aggregates the HTTP request and response bodies during the processing of a request. It ensures that only a configurable maximum amount of data is stored to prevent excessive memory usage.
@@ -118,6 +121,7 @@ class AuditContext:
             )
 
 
+# 攔截 request 和 response
 class AuditLoggingMiddleware:
     """
     ASGI middleware that intercepts HTTP requests and responses to perform audit logging. It captures request/response bodies (depending on audit level), headers, HTTP methods, and user information, then logs a structured audit entry at the end of the request cycle.
@@ -177,6 +181,7 @@ class AuditLoggingMiddleware:
 
             await self.app(scope, receive_wrapper, send_wrapper)
 
+    # 包裝 request 生命週期，進入時建立 context，離開時呼叫 _log_audit_entry()
     @asynccontextmanager
     async def _audit_context(
         self, request: Request
@@ -190,7 +195,7 @@ class AuditLoggingMiddleware:
         finally:
             await self._log_audit_entry(request, context)
 
-    async def _get_authenticated_user(self, request: Request) -> UserModel:
+    async def _get_authenticated_user(self, request: Request) -> User:
 
         auth_header = request.headers.get("Authorization")
         assert auth_header
@@ -233,7 +238,7 @@ class AuditLoggingMiddleware:
 
             entry = AuditLogEntry(
                 id=str(uuid.uuid4()),
-                user=user.model_dump(include={"id", "name", "email", "role"}),
+                user=user.model_dump(include={"id", "username", "email", "role"}),
                 audit_level=self.audit_level.value,
                 verb=request.method,
                 request_uri=str(request.url),

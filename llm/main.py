@@ -1,5 +1,5 @@
 # from typing import Any, Dict, Union
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Depends
 from starlette.applications import Starlette
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -7,6 +7,7 @@ from pathlib import Path
 import time
 import sys
 import uuid
+from typing import Annotated
 from contextlib import asynccontextmanager
 
 ### 處理 middleware ###
@@ -19,29 +20,34 @@ from fastapi.templating import Jinja2Templates
 # # 載入靜態檔案
 from fastapi.staticfiles import StaticFiles
 
-# from llm.env import (
-#     GLOBAL_LOG_LEVEL,
-#     SRC_LOG_LEVELS,
-# )
-from llm.env import *
+from llm.env import (
+    GLOBAL_LOG_LEVEL,
+    SRC_LOG_LEVELS,
+    AUDIT_LOG_LEVEL,
+    AUDIT_EXCLUDED_PATHS,
+    MAX_BODY_LOG_SIZE,
+    )
+
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from .database import get_db
+
 
 ### 處理 routers ### .routers 同層的 routers 目錄引入
 from .routes import auth, files, users, admin
 
 ### Log 處理 ###
-from .log import init_logging
-# import logging
+# from .log import init_logging
+# logger = init_logging()
 
-# from llm.utils import logger
-# from llm.utils.audit import AuditLevel, AuditLoggingMiddleware
-# from llm.utils.logger import start_logger
-# import logging
+import logging
+from llm.utils import logger
+from llm.utils.audit import AuditLevel, AuditLoggingMiddleware
+from llm.utils.logger import start_logger
 
-logger = init_logging()
-
-# logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-# log = logging.getLogger(__name__)
-# log.setLevel(SRC_LOG_LEVELS["MAIN"])
+logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["MAIN"])
 
 # 開關 cmd 預設 log 資訊
 # logger_ac = logging.getLogger("uvicorn.access")
@@ -57,7 +63,9 @@ from .database import Base, engine
 from llm.env import BASE_DIR
 
 
-# load_dotenv(dotenv_path='.env')
+# 透過 Depends 注入 db，建立 Session
+# 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
+# db_dependency = Annotated[Session, Depends(get_db)]
 
 ### Middleware API 時間計算 ###
 class CalcApiTimeMiddleware(BaseHTTPMiddleware):
@@ -68,12 +76,13 @@ class CalcApiTimeMiddleware(BaseHTTPMiddleware):
         response.headers["X-Process-Time"] = str(process_time)
         return response
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_logger()
+    yield
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     start_logger()
-#     yield
+
+app = FastAPI(lifespan=lifespan,)
 
 CORS_ALLOW_ORIGINS = ['*']
 
@@ -95,19 +104,19 @@ app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
 app.include_router(admin.router,   prefix="/api/v1/admin", tags=["admin"])
 # app.include_router(todos.router)
 
-# try:
-#     audit_level = AuditLevel(AUDIT_LOG_LEVEL)
-# except ValueError as e:
-#     logger.error(f"Invalid audit level: {AUDIT_LOG_LEVEL}. Error: {e}")
-#     audit_level = AuditLevel.NONE
+try:
+    audit_level = AuditLevel(AUDIT_LOG_LEVEL)
+except ValueError as e:
+    logger.error(f"Invalid audit level: {AUDIT_LOG_LEVEL}. Error: {e}")
+    audit_level = AuditLevel.NONE
 
-# if audit_level != AuditLevel.NONE:
-#     app.add_middleware(
-#         AuditLoggingMiddleware,
-#         audit_level=audit_level,
-#         excluded_paths=AUDIT_EXCLUDED_PATHS,
-#         max_body_size=MAX_BODY_LOG_SIZE,
-#     )
+if audit_level != AuditLevel.NONE:
+    app.add_middleware(
+        AuditLoggingMiddleware,
+        audit_level=audit_level,
+        excluded_paths=AUDIT_EXCLUDED_PATHS,
+        max_body_size=MAX_BODY_LOG_SIZE,
+    )
 
 
 # main.py 執行時 建立 database 及 tables
@@ -117,7 +126,8 @@ Base.metadata.create_all(bind=engine)
 @app.exception_handler(NewHTTPException)
 async def http_exception_handler(request: Request, exc: NewHTTPException):
     print("Error:", exc.msg)   # 紀錄可預期的錯誤的 log
-    logger.error(exc.msg)
+    # logger.error(exc.msg)
+    log.error(exc.msg)
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
@@ -131,11 +141,11 @@ async def get_request(request: Request, call_next):
     try:
         response = await call_next(request)
         if response.status_code < 400:
-            logger.info('Info')
+            log.info('Info')
         return response
     except Exception as e:     # 非預期的錯誤
         print("Error:", e)     # 紀錄非預期的錯誤的 log
-        logger.error('Error:', e)
+        log.error('Error:', e)
         return JSONResponse(
             status_code=500,
             content={"detail": "Internal Server Error"},
@@ -178,6 +188,15 @@ def health_check():
         return {'status': 'Healthy'}
     except NameError as e:
         raise NewHTTPException(status.HTTP_501_NOT_IMPLEMENTED, detail="Internal Server Error", msg=str(e))
+
+@app.get("/healthy/db")
+async def health_check_with_db():
+    with get_db() as db:
+        query = text("SELECT * FROM users")
+        result = db.execute(query)
+        if result is None:
+            return {"status": False}
+    return {"status": True}
 
 # 模擬 API 耗時操作
 @app.get("/slow")

@@ -8,7 +8,7 @@ from starlette import status
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, HTTPAuthorizationCredentials, HTTPBearer
 
 from ..database import (get_db)
 # 建立 Session 對話
@@ -62,3 +62,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         return { 'username': username, 'id': user_id, 'user_role': user_role }
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
+def get_http_authorization_cred(auth_header: str):
+    try:
+        scheme, credentials = auth_header.split(" ")
+        return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
+    except Exception:
+        raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
