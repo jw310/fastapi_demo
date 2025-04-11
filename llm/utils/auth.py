@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 # 使用 bcrypt 加密密碼
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 驗證 token
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
 from llm.models.users import Users
 
@@ -38,6 +38,13 @@ async def authenticate_user(username: str, password: str):
     if not bcrypt_context.verify(password, user.hashed_password):
         return False
     return user
+
+# def get_http_authorization_cred(auth_header: str):
+#     try:
+#         scheme, credentials = auth_header.split(" ")
+#         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
+#     except Exception:
+#         raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
 # 建立 JWT token
 async def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
@@ -63,9 +70,3 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-def get_http_authorization_cred(auth_header: str):
-    try:
-        scheme, credentials = auth_header.split(" ")
-        return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
-    except Exception:
-        raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")

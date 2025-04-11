@@ -7,6 +7,7 @@ from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from llm.utils.auth import get_current_user
+from llm.utils.newHTTPException import NewHTTPException
 
 from llm.models.users import (Users, CreateUserRequest)
 
@@ -19,10 +20,6 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
 router = APIRouter()
-
-# 透過 Depends 注入 db，建立 Session
-# 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
-# db_dependency = Annotated[Session, Depends(get_db)]
 
 # 建立 user 的 dependency，從 get_current_user 取得 user info
 user_dependency = Annotated[dict, Depends(get_current_user)]
@@ -54,26 +51,32 @@ async def create_user(create_user_request: CreateUserRequest):
     }
 
 @router.get("/username", status_code=status.HTTP_200_OK)
-async def get_user_by_username(username: str):
-    user = await Users.get_user_by_username(username)
-
+async def get_user_by_username(user: user_dependency, username: str):
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
+    userData = await Users.get_user_by_username(username)
+
+    if userData is None:
+        raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     return {
         "message": "Success",
-        "user": user
+        "user": userData
     }
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
-async def get_user_by_id(user_id: int):
-    user = await Users.get_user_by_id(user_id)
-
+async def get_user_by_id(user: user_dependency, user_id: int):
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
+    userData = await Users.get_user_by_id(user_id)
+
+    if userData is None:
+        raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     return {
         "message": "Success",
-        "user": user
+        "user": userData
     }
 

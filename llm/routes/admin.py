@@ -10,6 +10,8 @@ from llm.utils.newHTTPException import NewHTTPException
 
 from llm.models.users import (Users)
 
+from llm.utils.auth import authenticate_user
+
 # 模板
 from fastapi.templating import Jinja2Templates
 
