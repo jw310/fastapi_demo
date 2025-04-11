@@ -191,7 +191,7 @@ if (registerForm) {
     };
 
     try {
-      const response = await fetch("/users/create", {
+      const response = await fetch("/api/v1/users/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +200,7 @@ if (registerForm) {
       });
 
       if (response.ok) {
-        window.location.href = "/users/login-page";
+        window.location.href = "/api/v1/users/login-page";
       } else {
         // Handle error
         const errorData = await response.json();
@@ -243,5 +243,5 @@ function logout() {
   }
 
   // Redirect to the login page
-  window.location.href = "/users/login-page";
+  window.location.href = "/api/v1/users/login-page";
 }
