@@ -39,12 +39,12 @@ async def authenticate_user(username: str, password: str):
         return False
     return user
 
-# def get_http_authorization_cred(auth_header: str):
-#     try:
-#         scheme, credentials = auth_header.split(" ")
-#         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
-#     except Exception:
-#         raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+def get_http_authorization_cred(auth_header: str):
+    try:
+        scheme, credentials = auth_header.split(" ")
+        return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
+    except Exception:
+        raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
 # 建立 JWT token
 async def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
@@ -69,4 +69,3 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         return { 'username': username, 'id': user_id, 'user_role': user_role }
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
-

@@ -40,6 +40,9 @@ from .routes import auth, files, users, admin
 from .log import init_logging
 log = init_logging()
 
+from .transcribe_speech import pipe
+print(pipe)
+
 # import logging
 # from llm.utils import logger
 # from llm.utils.audit import AuditLevel, AuditLoggingMiddleware
@@ -66,7 +69,6 @@ from llm.env import BASE_DIR
 # 透過 Depends 注入 db，建立 Session
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
 # db_dependency = Annotated[Session, Depends(get_db)]
-
 
 ##################
 ### Middleware ###
