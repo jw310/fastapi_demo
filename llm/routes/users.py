@@ -62,7 +62,7 @@ async def get_user_by_username(user: user_dependency, username: str):
 
     return {
         "message": "Success",
-        "user": userData
+        "data": userData
     }
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
@@ -77,6 +77,6 @@ async def get_user_by_id(user: user_dependency, user_id: int):
 
     return {
         "message": "Success",
-        "user": userData
+        "data": userData
     }
 

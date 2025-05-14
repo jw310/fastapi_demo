@@ -46,7 +46,7 @@ async def get_all_users(user: user_dependency):
 
     return {
         "message": "Success",
-        "users": users
+        "data": users
     }
 
 

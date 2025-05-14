@@ -59,7 +59,7 @@ async def upload_files(user: user_dependency, files: list[UploadFile] | None = N
             f.write(content)
 
     return { "message": "File uploaded successfully",
-        "files": [
+        "data": [
             {
                 "filename": file.filename,
                 "file_size": file.size,

@@ -3,8 +3,6 @@ import os
 import codecs
 import tempfile
 
-from llm.env import BASE_DIR
-
 # https://huggingface.co/gacky1601/whisper-small-taiwanese-asr-v2
 from transformers import pipeline
 pipe = pipeline(task="automatic-speech-recognition", model="gacky1601/whisper-small-taiwanese-asr-v2")
@@ -13,35 +11,38 @@ pipe = pipeline(task="automatic-speech-recognition", model="gacky1601/whisper-sm
 import whisper
 model = whisper.load_model("large-v3")
 
-audio_path = os.path.join(f"{BASE_DIR}/data/audio/")
+audio_path = os.path.join(os.getcwd(), 'llm/data/audio')
+
+print(audio_path)
 
 
+def convert_m4a_to_mp3(m4a_filename):
+    audio = AudioSegment.from_file(f'{audio_path}/{m4a_filename}.m4a')
+    audio.export(f'{audio_path}/{m4a_filename}.mp3', format="mp3")
 
-def convert_m4a_to_mp3(m4a_file, mp3_file):
-    audio = AudioSegment.from_file(os.path.join(audio_path, m4a_file))
-    audio.export(os.path.join(audio_path, mp3_file), format="mp3")
+    # print(f'Converted m4a to mp3.')
 
-    print(f'Converted {m4a_file} to {mp3_file}.')
+convert_m4a_to_mp3('test')
 
-def convert_mp3_to_wav(mp3_path, wav_path):
-    audio = AudioSegment.from_mp3(os.path.join(audio_path, mp3_path))
-    audio.export(os.path.join(audio_path, wav_path), format="wav")
+def convert_mp3_to_wav(mp3_filename):
+    audio = AudioSegment.from_mp3(f'{audio_path}/{mp3_filename}.mp3')
+    audio.export(f'{audio_path}/{mp3_filename}.wav', format="wav")
 
-    print(f'Converted {mp3_path} to {wav_path}.')
+    # print(f'Converted mp3 to wav.')
 
-# convert_m4a_to_mp3('test2.m4a', 'test2.mp3')
+convert_mp3_to_wav('test')
 
 
 def transcribe_speech(filepath):
     # output = pipe(os.path.join(audio_path, filepath))
 
     output = model.transcribe(os.path.join(audio_path, filepath), fp16=False)
-    print(output)
+    # print(output)
     with open(os.path.join(audio_path, "transcribe_speech.txt"), "w", encoding="utf-8") as f:
         f.write(output["text"])
     return output["text"]
 
-transcribe_speech("test5.m4a")
+transcribe_speech("test.m4a")
 
 
 def split_and_transcribe_audio(file_path, segment_length_seconds=30):
