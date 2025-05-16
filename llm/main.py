@@ -40,8 +40,8 @@ from .routes import auth, files, users, admin
 from .log import init_logging
 log = init_logging()
 
-from .transcribe_speech import pipe
-print(pipe)
+# from .transcribe_speech import pipe
+# print(pipe)
 
 # import logging
 # from llm.utils import logger

@@ -47,10 +47,10 @@ def get_http_authorization_cred(auth_header: str):
         raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
 # 建立 JWT token
-async def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
+async def create_access_token(username: str, uuid: str, role: str, expires_delta: timedelta):
     encode = {
-        "sub": username,
-        "id": user_id,
+        "sub": uuid,
+        "name": username,
         "role": role
     }
     expires = datetime.now(timezone.utc) + expires_delta
