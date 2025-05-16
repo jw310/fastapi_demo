@@ -49,6 +49,7 @@ def get_http_authorization_cred(auth_header: str):
 # 建立 JWT token
 async def create_access_token(username: str, uuid: str, role: str, expires_delta: timedelta):
     encode = {
+        # sub 通常是指使用者的 id
         "sub": uuid,
         "name": username,
         "role": role
