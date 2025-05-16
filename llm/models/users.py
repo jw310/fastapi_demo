@@ -135,11 +135,12 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def get_user_by_id(self, user_id):
+    async def get_user_by_id(self, uuid):
         try:
+            print(uuid)
             with get_db() as db:
-                query = text("SELECT * FROM users WHERE id = :user_id")
-                result = db.execute(query, {"user_id": user_id})
+                query = text("SELECT * FROM users WHERE uuid = :uuid")
+                result = db.execute(query, {"uuid": uuid})
                 # sqlalchemy Object 需要轉成 dict
                 row = result.fetchone()
 

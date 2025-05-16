@@ -65,12 +65,12 @@ async def get_user_by_username(user: user_dependency, username: str):
         "data": userData
     }
 
-@router.get("/{user_id}", status_code=status.HTTP_200_OK)
-async def get_user_by_id(user: user_dependency, user_id: int):
+@router.get("/uuid", status_code=status.HTTP_200_OK)
+async def get_user_by_id(user: user_dependency, uuid: str):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    userData = await Users.get_user_by_id(user_id)
+    userData = await Users.get_user_by_id(uuid)
 
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
