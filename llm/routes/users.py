@@ -42,7 +42,10 @@ def render_register_page(request: Request):
 ### Endpoints ###
 #################
 @router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_user(create_user_request: CreateUserRequest):
+async def create_user(user: user_dependency, create_user_request: CreateUserRequest):
+    if user is None:
+        raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
     user = await Users.insert_new_user(create_user_request)
     # print(user)
 
