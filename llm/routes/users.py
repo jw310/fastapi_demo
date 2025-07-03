@@ -46,7 +46,7 @@ async def create_user(user: user_dependency, create_user_request: CreateUserRequ
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    user = await Users.insert_new_user(create_user_request)
+    user = await Users.insert(create_user_request)
     # print(user)
 
     return {
@@ -58,7 +58,7 @@ async def get_user_by_username(user: user_dependency, username: str):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    userData = await Users.get_user_by_username(username)
+    userData = await Users.findByName(username)
 
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -73,7 +73,7 @@ async def get_user_by_id(user: user_dependency, uuid: str):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    userData = await Users.get_user_by_id(uuid)
+    userData = await Users.findById(uuid)
 
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -83,3 +83,16 @@ async def get_user_by_id(user: user_dependency, uuid: str):
         "data": userData
     }
 
+@router.delete("/uuid", status_code=status.HTTP_200_OK)
+async def delete_user_by_id(user: user_dependency, uuid: str):
+    if user is None:
+        raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
+    userData = await Users.deleteById(uuid)
+
+    if userData is None:
+        raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return {
+        "message": "Success",
+    }

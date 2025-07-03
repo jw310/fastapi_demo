@@ -31,7 +31,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 # 身分驗證
 async def authenticate_user(username: str, password: str):
     # user = db.query(Users).filter(Users.username == username).first()
-    user = await Users.get_user_by_username(username)
+    user = await Users.findByName(username)
     if not user:
         return False
     # # bcrypt 會自動將 password 加密後比對

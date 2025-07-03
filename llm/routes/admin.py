@@ -39,7 +39,7 @@ async def get_all_users(user: user_dependency):
                 detail="Invalid authentication credentials",
         )
 
-    users = await Users.get_users()
+    users = await Users.findAll()
 
     if users is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

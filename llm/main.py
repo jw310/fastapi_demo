@@ -40,10 +40,13 @@ from .routes import auth, files, users, admin
 from .log import init_logging
 log = init_logging()
 
+### google cloud storage ###
+# from llm.utils.google_cloud_storage import *
+
 ### 執行測試檔 ###
 # from llm.utils.test import *
 
-# from .transcribe_speech import pipe
+# from llm.utils.transcribe_speech import pipe
 # print(pipe)
 
 # import logging

@@ -64,7 +64,7 @@ class CreateUserRequest(BaseModel):
 class UsersTable:
     # 使用 class 內的函數時，必須加上 self 參數，不然會產生 takes 1 positional argument but 2 were given 錯誤
     # # 跟直接使用 def 的函數時用法不一樣
-    async def insert_new_user(self, create_user_request):
+    async def insert(self, create_user_request):
         try:
             # 用 with 管理資源的獲取跟釋放
             with get_db() as db:
@@ -96,8 +96,7 @@ class UsersTable:
                 msg=str(e)
             )
 
-
-    async def get_users(self):
+    async def findAll(self):
         try:
             with get_db() as db:
                 query = text("SELECT * FROM users")
@@ -135,7 +134,7 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def get_user_by_id(self, uuid):
+    async def findById(self, uuid):
         try:
             print(uuid)
             with get_db() as db:
@@ -176,7 +175,7 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def get_user_by_username(self, username):
+    async def findByName(self, username):
         try:
             with get_db() as db:
                 query = text("SELECT * FROM users WHERE username = :username")
@@ -202,6 +201,60 @@ class UsersTable:
                 user = dict_to_object(user)
 
                 return user
+
+        except SQLAlchemyError as e:
+            raise NewHTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+                msg=str(e)
+            )
+        except Exception as e:
+            raise NewHTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
+                msg=str(e)
+            )
+
+    async def deleteById(self, uuid):
+        try:
+            with get_db() as db:
+                delete_user = db.query(User).filter(User.uuid == uuid).first()
+                if delete_user:
+                    db.delete(delete_user)
+                    db.commit()
+                    return True
+
+        except SQLAlchemyError as e:
+            raise NewHTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+                msg=str(e)
+            )
+        except Exception as e:
+            raise NewHTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
+                msg=str(e)
+            )
+
+    async def updateById(self, uuid, payload):
+        try:
+            with get_db() as db:
+                # 先查出資料是否存在再更新
+                # update_user = db.query(User).filter(User.uuid == uuid).first()
+                # if update_user:
+                #     update_user.email = payload.get('email')
+                #     update_user.username = payload.get('username')
+                #     update_user.first_name = payload.get('first_name')
+                #     update_user.last_name = payload.get('last_name')
+                #     update_user.hashed_password = payload.get('hashed_password')
+                #     update_user.role = payload.get('role')
+                #     update_user.phone_number = payload.get('phone_number')
+                #     db.commit()
+
+                # 透過條件來更新
+                db.query(User).where(User.uuid == uuid).update(payload)
+                db.commit()
 
         except SQLAlchemyError as e:
             raise NewHTTPException(
