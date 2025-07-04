@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from llm.utils.auth import get_current_user
 from llm.utils.newHTTPException import NewHTTPException
 
-from llm.models.users import (Users, CreateUserRequest)
+from llm.models.user import (Users, CreateUserRequest)
 
 # 模板
 from fastapi.templating import Jinja2Templates

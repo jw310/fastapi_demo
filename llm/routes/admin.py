@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from llm.utils.auth import get_current_user
 from llm.utils.newHTTPException import NewHTTPException
 
-from llm.models.users import (Users)
+from llm.models.user import Users
 
 from llm.utils.auth import authenticate_user
 

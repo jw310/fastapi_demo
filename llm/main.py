@@ -34,7 +34,7 @@ from .database import get_db
 
 
 ### 處理 routers ### .routers 同層的 routers 目錄引入
-from .routes import auth, files, users, admin
+from .routes import auth, files, user, admin
 
 ### Log 處理 ###
 from .log import init_logging
@@ -125,7 +125,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(user.router, prefix="/api/v1/user", tags=["user"])
 app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
 app.include_router(admin.router,   prefix="/api/v1/admin", tags=["admin"])
 # app.include_router(todos.router)

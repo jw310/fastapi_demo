@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from llm.utils.newHTTPException import NewHTTPException
 from llm.utils.auth import get_current_user
 
-from llm.models.users import (Users, CreateUserRequest)
+# from llm.models.user import (Users, CreateUserRequest)
 
 # 建立 user 的 dependency，從 get_current_user 取得 user info
 user_dependency = Annotated[dict, Depends(get_current_user)]

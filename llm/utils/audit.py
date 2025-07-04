@@ -27,7 +27,7 @@ from starlette.requests import Request
 
 from llm.env import AUDIT_LOG_LEVEL, MAX_BODY_LOG_SIZE
 from llm.utils.auth import get_current_user, get_http_authorization_cred
-from llm.models.users import User
+from llm.models.user import User
 
 
 if TYPE_CHECKING:

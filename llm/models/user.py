@@ -3,7 +3,6 @@ import uuid
 from typing import Optional, Annotated
 from datetime import datetime
 from decimal import Decimal
-import json
 
 from fastapi import Depends, HTTPException, status
 
@@ -252,13 +251,11 @@ class UsersTable:
         try:
             with get_db() as db:
                 # 先查出資料是否存在再更新
-                update_user = db.query(User).filter(User.id == id).first()
-                userDict = update_user.to_dict()
+                # update_user = db.query(User).filter(User.id == id).first()
+                # userDict = update_user.to_dict()
+                # print(userDict, payload)
 
-                print(userDict, payload)
-
-                if update_user:
-                    update_user.email = ''
+                # if update_user:
                     # update_user.username = payload.get('email') if payload.get('email') else userDict['username'],
                     # update_user.first_name = payload.get('first_name') if payload.get('first_name') else userDict['first_name'],
                     # update_user.last_name = payload.get('last_name') if payload.get('last_name') else userDict['last_name'],
@@ -266,13 +263,18 @@ class UsersTable:
                     # update_user.role = payload.get('role') if payload.get('role') else userDict['role'],
                     # update_user.is_active = payload.get('is_active') if payload.get('is_active') else userDict['is_active'],
                     # update_user.phone_number = payload.get('phone_number') if payload.get('phone_number') else userDict['phone_number'],
-                    db.commit()
+                    # db.commit()
 
                 # return dict_to_object(update_user)
 
                 # # 透過條件來更新
                 # update_data = update(User).where(User.uuid == uuid).values(**payload)
                 # db.execute(update_data)
+                # db.commit()
+
+                print(payload)
+
+                # db.query(User).filter(User.id == id).update(payload)
                 # db.commit()
 
         except SQLAlchemyError as e:

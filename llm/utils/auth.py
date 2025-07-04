@@ -19,7 +19,7 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 驗證 token
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
-from llm.models.users import Users
+from llm.models.user import Users
 
 from llm.env import (SECRET_KEY, ALGORITHM)
 
