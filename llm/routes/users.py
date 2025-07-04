@@ -83,7 +83,7 @@ async def get_user_by_id(user: user_dependency, id: int):
         "data": userData
     }
 
-@router.delete("/uuid", status_code=status.HTTP_200_OK)
+@router.delete("/id", status_code=status.HTTP_200_OK)
 async def delete_user_by_id(user: user_dependency, uuid: str):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
@@ -97,12 +97,12 @@ async def delete_user_by_id(user: user_dependency, uuid: str):
         "message": "Success",
     }
 
-@router.patch("/uuid", status_code=status.HTTP_200_OK)
-async def update_user_by_id(user: user_dependency, uuid: str, payload: dict):
+@router.patch("/id", status_code=status.HTTP_200_OK)
+async def update_user_by_id(user: user_dependency, id: int, payload: dict):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    userData = await Users.updateById(uuid, payload)
+    userData = await Users.updateById(id, payload)
 
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
