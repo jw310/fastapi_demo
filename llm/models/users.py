@@ -3,6 +3,7 @@ import uuid
 from typing import Optional, Annotated
 from datetime import datetime
 from decimal import Decimal
+import json
 
 from fastapi import Depends, HTTPException, status
 
@@ -41,6 +42,11 @@ class User(Base):
     role = Column(String, nullable=False)
     phone_number = Column(String)
 
+    def to_dict(self):
+        model_dict = dict(self.__dict__)
+        del model_dict['_sa_instance_state']
+        return model_dict
+    Base.to_dict = to_dict
 
 ####################
 # Request、Forms
@@ -53,6 +59,7 @@ class CreateUserRequest(BaseModel):
     last_name: str
     password: str
     role: str
+    is_active: bool
     phone_number: str
 
 
@@ -81,6 +88,8 @@ class UsersTable:
                 # print(create_user_model)
                 db.add(create_user_model)
                 db.commit()
+
+                return True
 
         except SQLAlchemyError as e:
             raise NewHTTPException(
@@ -114,6 +123,7 @@ class UsersTable:
                         "last_name": row.last_name,
                         "hashed_password": row.hashed_password,
                         "role": row.role,
+                        "is_active": row.is_active,
                         "phone_number": row.phone_number
                         } for row in result
                     ]
@@ -134,12 +144,12 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def findById(self, uuid):
+    async def findById(self, id):
         try:
-            print(uuid)
+            print(id)
             with get_db() as db:
-                query = text("SELECT * FROM users WHERE uuid = :uuid")
-                result = db.execute(query, {"uuid": uuid})
+                query = text("SELECT * FROM users WHERE id = :id")
+                result = db.execute(query, {"id": id})
                 # sqlalchemy Object 需要轉成 dict
                 row = result.fetchone()
 
@@ -155,6 +165,7 @@ class UsersTable:
                     "last_name": row.last_name,
                     "hashed_password": row.hashed_password,
                     "role": row.role,
+                    "is_active": row.is_active,
                     "phone_number": row.phone_number
                 }
 
@@ -215,10 +226,10 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def deleteById(self, uuid):
+    async def deleteById(self, id):
         try:
             with get_db() as db:
-                delete_user = db.query(User).filter(User.uuid == uuid).first()
+                delete_user = db.query(User).filter(User.id == id).first()
                 if delete_user:
                     db.delete(delete_user)
                     db.commit()
@@ -237,24 +248,32 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def updateById(self, uuid, payload):
+    async def updateById(self, id, payload):
         try:
             with get_db() as db:
                 # 先查出資料是否存在再更新
-                # update_user = db.query(User).filter(User.uuid == uuid).first()
-                # if update_user:
-                #     update_user.email = payload.get('email')
-                #     update_user.username = payload.get('username')
-                #     update_user.first_name = payload.get('first_name')
-                #     update_user.last_name = payload.get('last_name')
-                #     update_user.hashed_password = payload.get('hashed_password')
-                #     update_user.role = payload.get('role')
-                #     update_user.phone_number = payload.get('phone_number')
-                #     db.commit()
+                update_user = db.query(User).filter(User.id == id).first()
+                userDict = update_user.to_dict()
 
-                # 透過條件來更新
-                db.query(User).where(User.uuid == uuid).update(payload)
-                db.commit()
+                print(userDict, payload)
+
+                if update_user:
+                    update_user.email = ''
+                    # update_user.username = payload.get('email') if payload.get('email') else userDict['username'],
+                    # update_user.first_name = payload.get('first_name') if payload.get('first_name') else userDict['first_name'],
+                    # update_user.last_name = payload.get('last_name') if payload.get('last_name') else userDict['last_name'],
+                    # update_user.hashed_password = payload.get('hashed_password') if bcrypt_context.hash(payload.get('hashed_password')) else userDict['hashed_password'],
+                    # update_user.role = payload.get('role') if payload.get('role') else userDict['role'],
+                    # update_user.is_active = payload.get('is_active') if payload.get('is_active') else userDict['is_active'],
+                    # update_user.phone_number = payload.get('phone_number') if payload.get('phone_number') else userDict['phone_number'],
+                    db.commit()
+
+                # return dict_to_object(update_user)
+
+                # # 透過條件來更新
+                # update_data = update(User).where(User.uuid == uuid).values(**payload)
+                # db.execute(update_data)
+                # db.commit()
 
         except SQLAlchemyError as e:
             raise NewHTTPException(

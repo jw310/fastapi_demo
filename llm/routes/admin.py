@@ -31,7 +31,7 @@ templates = Jinja2Templates(directory="llm/templates")
 #################
 ### Endpoints ###
 #################
-@router.get("/allUsers", status_code=status.HTTP_200_OK)
+@router.get("/all_user", status_code=status.HTTP_200_OK)
 async def get_all_users(user: user_dependency):
     if user is None or user.get('user_role') != 'admin':
         raise HTTPException (

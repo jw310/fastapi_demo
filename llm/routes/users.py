@@ -47,11 +47,11 @@ async def create_user(user: user_dependency, create_user_request: CreateUserRequ
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
     user = await Users.insert(create_user_request)
-    # print(user)
 
-    return {
-        "message": "User created successfully",
-    }
+    if user:
+        return {
+            "message": "Success",
+        }
 
 @router.get("/username", status_code=status.HTTP_200_OK)
 async def get_user_by_username(user: user_dependency, username: str):
@@ -68,12 +68,12 @@ async def get_user_by_username(user: user_dependency, username: str):
         "data": userData
     }
 
-@router.get("/uuid", status_code=status.HTTP_200_OK)
-async def get_user_by_id(user: user_dependency, uuid: str):
+@router.get("/id", status_code=status.HTTP_200_OK)
+async def get_user_by_id(user: user_dependency, id: int):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    userData = await Users.findById(uuid)
+    userData = await Users.findById(id)
 
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -89,6 +89,20 @@ async def delete_user_by_id(user: user_dependency, uuid: str):
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
     userData = await Users.deleteById(uuid)
+
+    if userData is None:
+        raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return {
+        "message": "Success",
+    }
+
+@router.patch("/uuid", status_code=status.HTTP_200_OK)
+async def update_user_by_id(user: user_dependency, uuid: str, payload: dict):
+    if user is None:
+        raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
+    userData = await Users.updateById(uuid, payload)
 
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
