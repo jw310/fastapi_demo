@@ -98,7 +98,7 @@ async def delete_user_by_id(user: user_dependency, uuid: str):
     }
 
 @router.patch("/id", status_code=status.HTTP_200_OK)
-async def update_user_by_id(user: user_dependency, id: int, payload: dict):
+async def update_user_by_id(user: user_dependency, id: int, payload: dict = {}):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
@@ -107,6 +107,7 @@ async def update_user_by_id(user: user_dependency, id: int, payload: dict):
     if userData is None:
         raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    return {
-        "message": "Success",
-    }
+    if userData:
+        return {
+            "message": "Success",
+        }
