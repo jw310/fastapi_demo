@@ -156,7 +156,10 @@ class UsersTable:
                 if result is None:
                     return None
 
-            users = [{
+                users = []
+
+                for row in result:
+                    users.append({
                         "id": row.id,
                         "uuid": row.uuid,
                         "email": row.email,
@@ -167,8 +170,21 @@ class UsersTable:
                         "role": row.role,
                         "is_active": row.is_active,
                         "phone_number": row.phone_number
-                        } for row in result
-                    ]
+                    })
+
+                # users = [{
+                #             "id": row.id,
+                #             "uuid": row.uuid,
+                #             "email": row.email,
+                #             "username": row.username,
+                #             "first_name": row.first_name,
+                #             "last_name": row.last_name,
+                #             "hashed_password": row.hashed_password,
+                #             "role": row.role,
+                #             "is_active": row.is_active,
+                #             "phone_number": row.phone_number
+                #             } for row in result
+                #         ]
 
             return {
                 "data": users,
