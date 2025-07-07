@@ -53,6 +53,24 @@ async def create_user(user: user_dependency, create_user_request: CreateUserRequ
             "message": "Success",
         }
 
+@router.get("/all", status_code=status.HTTP_200_OK)
+async def get_all_users(user: user_dependency, limit: int = 10, page: int = 1):
+    if user is None or user.get('user_role') != 'admin':
+        raise HTTPException (
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+        )
+
+    users = await Users.findAll(limit, page)
+
+    if users is None:
+        raise NewHTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return {
+        "message": "Success",
+        "data": users
+    }
+
 @router.get("/username", status_code=status.HTTP_200_OK)
 async def get_user_by_username(user: user_dependency, username: str):
     if user is None:

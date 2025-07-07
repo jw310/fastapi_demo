@@ -3,6 +3,7 @@ import uuid
 from typing import Optional, Annotated
 from datetime import datetime
 from decimal import Decimal
+import math
 
 from fastapi import Depends, HTTPException, status
 
@@ -31,7 +32,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(String(36), default=str(uuid.uuid4()), unique=True, nullable=False)
+    uuid = Column(String(36), unique=True, nullable=False)
     email = Column(String, unique=True,  nullable=False)
     username = Column(String, unique=True, nullable=False)
     first_name = Column(String, nullable=False)
@@ -74,6 +75,7 @@ class UsersTable:
             # 用 with 管理資源的獲取跟釋放
             with get_db() as db:
                 create_user_model = User(
+                    uuid=str(uuid.uuid4()),
                     email=create_user_request.email,
                     username=create_user_request.username,
                     first_name=create_user_request.first_name,
@@ -103,11 +105,53 @@ class UsersTable:
                 msg=str(e)
             )
 
-    async def findAll(self):
+    async def findAll(self, limit: int = 10, page: int = 1):
         try:
+            if limit <= 0:
+                    limit = 10
+            if page <= 0:
+                    page = 1
+
+            # 計算 offset
+            offset = (page - 1) * limit
+
             with get_db() as db:
-                query = text("SELECT * FROM users")
-                result = db.execute(query)
+
+                count_query = text("SELECT COUNT(*) as total FROM users")
+                count_result = db.execute(count_query)
+                total_count = count_result.scalar()
+
+                if total_count == 0:
+                    return {
+                        "data": [],
+                        "pagination": {
+                            "pageSize": limit,
+                            "currentPage": page,
+                            "totalPages": 0,
+                            "totalCount": 0
+                        }
+                    }
+
+                total_pages = math.ceil(total_count / limit)
+
+                if page > total_pages:
+                    page = total_pages
+                    offset = (page - 1) * limit
+
+                query = text("""
+                    SELECT * FROM users
+                    ORDER BY id
+                    LIMIT :limit OFFSET :offset
+                """)
+
+                result = db.execute(query, {
+                    "limit": limit,
+                    "offset": offset
+                })
+
+                # ORM 用法
+                # users_query = db.query(User).order_by(User.id).offset(offset).limit(limit)
+                # users = users_query.all()
 
                 if result is None:
                     return None
@@ -126,7 +170,15 @@ class UsersTable:
                         } for row in result
                     ]
 
-            return users
+            return {
+                "data": users,
+                "pagination": {
+                    "pageSize": limit,
+                    "currentPage": page,
+                    "totalPages": total_pages,
+                    "totalCount": total_count
+                }
+            }
 
         except SQLAlchemyError as e:
             raise NewHTTPException(
@@ -144,7 +196,6 @@ class UsersTable:
 
     async def findById(self, id):
         try:
-            print(id)
             with get_db() as db:
                 query = text("SELECT * FROM users WHERE id = :id")
                 result = db.execute(query, {"id": id})
