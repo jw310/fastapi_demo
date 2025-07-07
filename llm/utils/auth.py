@@ -47,10 +47,10 @@ def get_http_authorization_cred(auth_header: str):
         raise ValueError(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
 # 建立 JWT token
-async def create_access_token(username: str, uuid: str, role: str, expires_delta: timedelta):
+async def create_access_token(username: str, id: int, role: str, expires_delta: timedelta):
     encode = {
         # sub 通常是指使用者的 id
-        "sub": uuid,
+        "sub": str(id),
         "name": username,
         "role": role
     }
@@ -63,8 +63,9 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("name")
-        user_id: int = payload.get("sub")
+        user_id: str = payload.get("sub")
         user_role: str = payload.get("role")
+
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
         return { 'username': username, 'id': user_id, 'user_role': user_role }
