@@ -7,14 +7,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 
-from llm.database import Base
+from llm.database import Base, get_db
 from llm.main import app
 from llm.models.user import User
 from llm.models.todos import Todos
-from llm.utils.auth import bcrypt_context
+from llm.utils.auth import get_current_user, bcrypt_context
 
 # 建立測試資料庫
-SQLALCHEMY_DATABASE_URL = "sqlite:///./testdb.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test_database.db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -36,12 +36,16 @@ def override_get_db():
 
 # 建立 test user 的 dependency
 def override_get_current_user():
-    return {'username': 'test', 'id': '1', 'user_role': 'admin'}
+    return {'username': 'test', 'id': 1, 'user_role': 'admin'}
+
+# 覆寫 db 和 user 的 原本 dependency
+app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_current_user] = override_get_current_user
 
 # 建立 client 端測試
 client = TestClient(app)
 
-# 建立 test api 的 fixture
+# 建立 test api 的 fixture ，可以使用此物件。建立可重用性
 ###
 # scope：表示作用域，預設為 "function"，亦即每個有用到此 fixture 的 test case 都會執行，另外還有 module、class 以及 session 三種
 # name：用來設定 fixture 的別名，預設為函式名稱
@@ -58,7 +62,7 @@ def test_user():
         hashed_password=bcrypt_context.hash('test'),
         is_active=True,
         role='admin',
-        phone_number='09123456789'
+        phone_number='0912345678'
     )
 
     db = TestingSessionLocal()

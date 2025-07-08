@@ -86,7 +86,7 @@ async def get_user_by_username(user: user_dependency, username: str):
         "data": userData
     }
 
-@router.get("/id", status_code=status.HTTP_200_OK)
+@router.get("/{id}", status_code=status.HTTP_200_OK)
 async def get_user_by_id(user: user_dependency, id: str):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
@@ -101,7 +101,7 @@ async def get_user_by_id(user: user_dependency, id: str):
         "data": userData
     }
 
-@router.delete("/id", status_code=status.HTTP_200_OK)
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_user_by_id(user: user_dependency, id: str):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
@@ -115,7 +115,7 @@ async def delete_user_by_id(user: user_dependency, id: str):
         "message": "Success",
     }
 
-@router.patch("/id", status_code=status.HTTP_200_OK)
+@router.patch("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_user_by_id(user: user_dependency, id: str, payload: dict = {}):
     if user is None:
         raise NewHTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
