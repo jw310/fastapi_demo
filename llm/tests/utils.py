@@ -42,7 +42,12 @@ def override_get_current_user():
 client = TestClient(app)
 
 # 建立 test api 的 fixture
-@pytest.fixture
+###
+# scope：表示作用域，預設為 "function"，亦即每個有用到此 fixture 的 test case 都會執行，另外還有 module、class 以及 session 三種
+# name：用來設定 fixture 的別名，預設為函式名稱
+# autouse：預設為 False，若為 True，則會自動進行使用 (根據 scope 作用域而定)
+###
+@pytest.fixture(name="test_user", scope="function", autouse=False)
 def test_user():
     user = User(
         uuid=str(uuid.uuid4()),

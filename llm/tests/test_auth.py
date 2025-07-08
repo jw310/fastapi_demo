@@ -4,7 +4,7 @@ import pytest
 from jose import jwt
 
 # 引用 utils.py 中的所有變數、函數
-from llm.test.utils import app, override_get_db, test_user
+from llm.tests.utils import app, override_get_db, test_user
 from llm.database import get_db
 from llm.utils.auth import authenticate_user, create_access_token, get_current_user
 from llm.env import SECRET_KEY, ALGORITHM
@@ -15,7 +15,6 @@ app.dependency_overrides[get_db] = override_get_db
 # 測試非同步函式 pytest-asyncio 套件用法
 @pytest.mark.asyncio
 async def test_authenticate_user(test_user: test_user):
-
     authenticated_user = await authenticate_user(test_user.username, 'test')
     assert authenticated_user is not None
     # assert authenticated_user.username == test_user.username
