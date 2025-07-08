@@ -14,7 +14,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 # 測試非同步函式 pytest-asyncio 套件用法
 @pytest.mark.asyncio
-async def test_authenticate_user(test_user):
+async def test_authenticate_user(test_user: test_user):
 
     authenticated_user = await authenticate_user(test_user.username, 'test')
     assert authenticated_user is not None

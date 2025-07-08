@@ -41,7 +41,7 @@ def override_get_current_user():
 # 建立 client 端測試
 client = TestClient(app)
 
-# 建立 test api 的 fixture，測試後刪除
+# 建立 test api 的 fixture
 @pytest.fixture
 def test_user():
     user = User(
@@ -60,6 +60,7 @@ def test_user():
     db.add(user)
     db.commit()
     yield user
+    # 測試後刪除
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users;"))
         connection.commit()
