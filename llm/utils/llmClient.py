@@ -6,7 +6,7 @@ from llm.utils.newHTTPException import NewHTTPException
 from llm.env import OPENAI_API_KEY, ANTHROPIC_CLAUDE_API_KEY, GEMINI_API_KEY
 
 # 建立 OpenAI 客戶端
-async def call_openai(message: str, model: str = 'gpt-4o-mini', **kwargs):
+async def call_openai(user_message: str, system_message: str, model: str = 'gpt-4o-mini', **kwargs):
         try:
             headers = {
                 "Authorization": f"Bearer {OPENAI_API_KEY}",
@@ -15,7 +15,10 @@ async def call_openai(message: str, model: str = 'gpt-4o-mini', **kwargs):
 
             payload = {
                 "model": model,
-                "messages": [{"role": "user", "content": message}],
+                "messages": [
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": user_message}
+                    ],
                 "temperature": kwargs.get("temperature", 0.7),
                 "max_tokens": kwargs.get("max_tokens", 1000)
             }
@@ -27,6 +30,8 @@ async def call_openai(message: str, model: str = 'gpt-4o-mini', **kwargs):
                     json=payload,
                     timeout=30.0
                 )
+
+                print(response.json())
 
                 if response.status_code != 200:
                     raise HTTPException(status_code=response.status_code, detail="OpenAI API error")
@@ -45,7 +50,7 @@ async def call_openai(message: str, model: str = 'gpt-4o-mini', **kwargs):
             )
 
 # 建立 Claude 客戶端
-async def call_claude(message: str, model: str = "claude-3-sonnet-20240229", **kwargs):
+async def call_claude(user_message: str, system_message: str, model: str = "claude-3-sonnet-20240229", **kwargs):
         try:
             headers = {
                 "x-api-key": f"{ANTHROPIC_CLAUDE_API_KEY}",
@@ -56,7 +61,10 @@ async def call_claude(message: str, model: str = "claude-3-sonnet-20240229", **k
             payload = {
                 "model": model,
                 "max_tokens": kwargs.get("max_tokens", 1000),
-                "messages": [{"role": "user", "content": message}],
+                "messages": [
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": user_message},
+                    ],
                 "temperature": kwargs.get("temperature", 0.7)
             }
 
@@ -85,14 +93,14 @@ async def call_claude(message: str, model: str = "claude-3-sonnet-20240229", **k
             )
 
 # 建立 Gemini 客戶端
-async def call_gemini(self, message: str, model: str = "gemini-pro", **kwargs):
+async def call_gemini(user_message: str, system_message: str, model: str = "gemini-pro", **kwargs):
         try:
 
             url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent"
             params = {"key": f'{GEMINI_API_KEY}'}
 
             payload = {
-                "contents": [{"parts": [{"text": message}]}],
+                "contents": [{"parts": [{"text": user_message}]}],
                 "generationConfig": {
                     "temperature": kwargs.get("temperature", 0.7),
                     "maxOutputTokens": kwargs.get("max_tokens", 1000)

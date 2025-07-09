@@ -31,14 +31,20 @@ class LLMProvider(str, Enum):
     # title = Column(String, nullable=False)
     # description = Column(String, nullable=True)
     # owner_id = Column(Integer, nullable=False)
-    # is_active = Column(Boolean, default=True)
 
 ####################
 # Request、Forms
 ####################
 class CreateChatRequest(BaseModel):
     provider: LLMProvider
-    message: str
+    user_message: str
+    model: Optional[str] = None
+    temperature: Optional[float] = 0.7
+    max_tokens: Optional[int] = 1000
+
+class CreateSystemRequest(BaseModel):
+    provider: LLMProvider
+    system_message: str
     model: Optional[str] = None
     temperature: Optional[float] = 0.7
     max_tokens: Optional[int] = 1000
