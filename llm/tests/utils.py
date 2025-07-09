@@ -19,7 +19,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test_database.db"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
-    poolclass = StaticPool
+    # poolclass = StaticPool
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -39,8 +39,8 @@ def override_get_current_user():
     return {'username': 'test', 'id': 1, 'user_role': 'admin'}
 
 # 覆寫 db 和 user 的 原本 dependency
-app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[get_current_user] = override_get_current_user
+# app.dependency_overrides[get_db] = override_get_db
+# app.dependency_overrides[get_current_user] = override_get_current_user
 
 # 建立 client 端測試
 client = TestClient(app)
@@ -68,8 +68,10 @@ def test_user():
     db = TestingSessionLocal()
     db.add(user)
     db.commit()
+    db.refresh(user)
     yield user
     # 測試後刪除
+    db.close()
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users;"))
         connection.commit()
@@ -83,5 +85,15 @@ def test_todo():
     db.commit()
     yield todo
     with engine.connect() as connection:
+        connection.execute(text("DELETE FROM todos;"))
+        connection.commit()
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_database():
+    """每次測試前後都清理資料庫"""
+    yield
+    # 測試後清理所有資料表
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM users;"))
         connection.execute(text("DELETE FROM todos;"))
         connection.commit()

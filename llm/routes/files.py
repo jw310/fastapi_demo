@@ -50,7 +50,7 @@ async def upload_files(user: user_dependency, files: list[UploadFile] | None = N
     if files is None:
         raise NewHTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No file uploaded")
     if not os.path.exists(output_folder):
-      os.makedirs(output_folder)
+        os.makedirs(output_folder)
     for file in files:
         # with 關鍵字的區塊結束之後自動關閉檔案，file.close()可省略
         with open(f'{output_folder}/{file.filename}', 'wb') as f:
@@ -67,4 +67,4 @@ async def upload_files(user: user_dependency, files: list[UploadFile] | None = N
                 "tag": tag
             } for file in files
         ]
-      }
+    }

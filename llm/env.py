@@ -110,6 +110,13 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
 
+####################################
+# LLM
+####################################
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_CLAUDE_API_KEY= os.getenv("ANTHROPIC_CLAUDE_API_KEY")
+GEMINI_API_KEY= os.getenv("GEMINI_API_KEY")
+
 
 ####################################
 # LOGGING
