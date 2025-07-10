@@ -5,7 +5,7 @@ from enum import Enum
 from llm.utils.newHTTPException import NewHTTPException
 from llm.env import OPENAI_API_KEY, ANTHROPIC_CLAUDE_API_KEY, GEMINI_API_KEY
 
-# 建立 OpenAI 客戶端
+# OpenAI Client
 async def call_openai(user_message: str, system_message: str, model: str = 'gpt-4o-mini', **kwargs):
         try:
             headers = {
@@ -49,7 +49,7 @@ async def call_openai(user_message: str, system_message: str, model: str = 'gpt-
                 msg=str(e)
             )
 
-# 建立 Claude 客戶端
+# Claude Client
 async def call_claude(user_message: str, system_message: str, model: str = "claude-3-sonnet-20240229", **kwargs):
         try:
             headers = {
@@ -92,7 +92,7 @@ async def call_claude(user_message: str, system_message: str, model: str = "clau
                 msg=str(e)
             )
 
-# 建立 Gemini 客戶端
+# Gemini Client
 async def call_gemini(user_message: str, system_message: str, model: str = "gemini-pro", **kwargs):
         try:
 
