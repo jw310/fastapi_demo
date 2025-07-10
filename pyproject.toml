@@ -27,7 +27,8 @@ dependencies = [
     "google-cloud-storage (>=3.1.1,<4.0.0)",
     "pytest (>=8.4.1,<9.0.0)",
     "httpx (>=0.28.1,<0.29.0)",
-    "pytest-asyncio (>=1.0.0,<2.0.0)"
+    "pytest-asyncio (>=1.0.0,<2.0.0)",
+    "qdrant-client (>=1.14.3,<2.0.0)"
 ]
 
 

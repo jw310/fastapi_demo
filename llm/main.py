@@ -32,7 +32,6 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from .database import get_db
 
-
 ### 處理 routers ### .routes 同層的 routers 目錄引入
 from .routes import auth, files, user, admin, chat
 
@@ -44,7 +43,7 @@ log = init_logging()
 # from llm.utils.google_cloud_storage import *
 
 ### 執行測試檔 ###
-# from llm.utils.test import *
+from llm.utils.test import *
 
 # from llm.utils.transcribe_speech import pipe
 # print(pipe)
@@ -71,9 +70,6 @@ from .database import Base, engine
 
 from llm.env import BASE_DIR
 
-# 透過 Depends 注入 db，建立 Session
-# 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
-# db_dependency = Annotated[Session, Depends(get_db)]
 
 ##################
 ### Middleware ###
@@ -190,10 +186,9 @@ app.mount('/static', StaticFiles(directory=BASE_DIR / 'static'), name='static')
 #################
 ### Endpoints ###
 #################
-
-# 檢查 app 是否正常啟動
 @app.get('/healthy')
 def health_check():
+    """ check app is running """
     try:
         return {'status': 'Healthy'}
     except NameError as e:
@@ -213,8 +208,6 @@ async def health_check_with_db():
 async def slow_endpoint():
     time.sleep(1)
     return {"message": "Slow endpoint processed"}
-
-
 
 # 在命令列中直接執行 python main.py 來啟動 FastAPI
 if __name__ == '__main__':

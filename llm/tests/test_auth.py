@@ -12,7 +12,7 @@ from llm.env import SECRET_KEY, ALGORITHM
 # 覆寫 db 的 原本 dependency
 app.dependency_overrides[get_db] = override_get_db
 
-# 測試非同步函式 pytest-asyncio 套件用法
+# test async function, use pytest-asyncio
 @pytest.mark.asyncio
 async def test_authenticate_user(test_user: test_user):
     authenticated_user = await authenticate_user(test_user.username, 'test')
@@ -57,7 +57,7 @@ async def test_get_current_user_missing_payload():
     encode = {'role': 'user'}
 
     token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-    # 異常發生的話，會回傳 HTTPException，取得後比對
+    # If an exception occurs, get HTTPException for comparison
     with pytest.raises(HTTPException) as excinfo:
         await get_current_user(token=token)
 

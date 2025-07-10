@@ -18,9 +18,6 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 router = APIRouter()
 
-# output_folder = os.path.join(os.getcwd(), 'llm/data/uploadFiles')
-
-
 #################
 ### Pages ###
 #################
