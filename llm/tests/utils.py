@@ -39,8 +39,8 @@ def override_get_current_user():
     return {'username': 'test', 'id': 1, 'user_role': 'admin'}
 
 # 覆寫 db 和 user 的 原本 dependency
-# app.dependency_overrides[get_db] = override_get_db
-# app.dependency_overrides[get_current_user] = override_get_current_user
+app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_current_user] = override_get_current_user
 
 # 建立 client 端測試
 client = TestClient(app)

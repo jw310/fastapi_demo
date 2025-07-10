@@ -16,7 +16,6 @@ async def call_openai(user_message: str, system_message: str, model: str = 'gpt-
             payload = {
                 "model": model,
                 "messages": [
-                        {"role": "system", "content": system_message},
                         {"role": "user", "content": user_message}
                     ],
                 "temperature": kwargs.get("temperature", 0.7),
@@ -62,7 +61,6 @@ async def call_claude(user_message: str, system_message: str, model: str = "clau
                 "model": model,
                 "max_tokens": kwargs.get("max_tokens", 1000),
                 "messages": [
-                        {"role": "system", "content": system_message},
                         {"role": "user", "content": user_message},
                     ],
                 "temperature": kwargs.get("temperature", 0.7)
@@ -75,6 +73,8 @@ async def call_claude(user_message: str, system_message: str, model: str = "clau
                     json=payload,
                     timeout=30.0
                 )
+
+                print(response.json())
 
                 if response.status_code != 200:
                     raise HTTPException(status_code=response.status_code, detail="Claude API error")
@@ -114,6 +114,8 @@ async def call_gemini(user_message: str, system_message: str, model: str = "gemi
                     json=payload,
                     timeout=30.0
                 )
+
+                print(response.json())
 
                 if response.status_code != 200:
                     raise HTTPException(status_code=response.status_code, detail="Gemini API error")

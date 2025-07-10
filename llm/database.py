@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 from contextlib import contextmanager
 
@@ -16,7 +15,10 @@ SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL
 
 # 建立 engine
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    # 建立 engine echo 在 cmd 上顯示所有執行的過程
+    echo=False
 )
 
 # if "sqlite" in SQLALCHEMY_DATABASE_URL:
@@ -40,15 +42,10 @@ engine = create_engine(
 #             SQLALCHEMY_DATABASE_URL, pool_pre_ping=True, poolclass=NullPool
 #         )
 
-
-# 建立 engine echo 在 cmd 上顯示所有執行的過程
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
-
 # 與資料庫建立 session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 建立 SQLAlchemy Base class
-# Base = declarative_base()
+# 建立 SQLAlchemy Base class，可以定義專門被繼承的通用 Base class
 class Base(DeclarativeBase):
     pass
 
@@ -76,4 +73,9 @@ def transaction_scope():
         # logger.error(f"Transaction rolled back due to error: {str(e)}")
         raise
 
+# 將 get_db 定義為 contextmanager 物件
 get_db = contextmanager(get_session)
+
+# 確保 get_db 是一個 generator function
+# FastAPI 的 Depends() 期望一個 generator function，而不是 contextmanager 物件
+# get_db = get_session
