@@ -17,7 +17,6 @@ try:
 except ImportError:
     print("dotenv not installed, skipping...")
 
-
 ####################################
 # DATA DIR
 ####################################
@@ -32,15 +31,16 @@ STATIC_DIR = Path(os.getenv("STATIC_DIR", BASE_DIR / "static")).resolve()
 # File Upload DIR
 ####################################
 UPLOAD_DIR = DATA_DIR / "uploads"
+# mkdir 建立目錄 exist_ok 表示如果目錄已存在則不建立 parents=True 如果父目錄不存在，會自動建立所有必要的父目錄
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 ####################################
 # Database
 ####################################
-POSTGRESQL_DATABASE_URL = os.environ.get("POSTGRESQL_DATABASE_URL", f"")
-
-# SQLite3
-SQLALCHEMY_DATABASE_URL = os.environ.get("SQLALCHEMY_SQLITE_DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL")
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
+# .env 檔案中可以設定 TEST_DATABASE_URL 為 true 來切換到測試環境的資料庫，然後 pytest
+SWITCH_TEST_DATABASE = os.environ.get("SWITCH_TESTING_DATABASE", "false").lower()
 
 # Check if the file exists
 # if os.path.exists(f"{DATA_DIR}/data.db"):
@@ -115,9 +115,8 @@ ALGORITHM = os.getenv("JWT_ALGORITHM")
 # LLM
 ####################################
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ANTHROPIC_CLAUDE_API_KEY= os.getenv("ANTHROPIC_CLAUDE_API_KEY")
-GEMINI_API_KEY= os.getenv("GEMINI_API_KEY")
-
+ANTHROPIC_CLAUDE_API_KEY = os.getenv("ANTHROPIC_CLAUDE_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 ####################################
 # Vector Database
@@ -154,14 +153,18 @@ QDRANT_URI = os.environ.get("QDRANT_URI", 'http://localhost:6333')
 QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
 
 # Pgvector
-PGVECTOR_DB_URL = os.environ.get("PGVECTOR_DB_URL", POSTGRESQL_DATABASE_URL)
-if VECTOR_DB == "pgvector" and not PGVECTOR_DB_URL.startswith("postgres"):
-    raise ValueError(
-        "Pgvector requires setting PGVECTOR_DB_URL or using Postgres with vector extension as the primary database."
+if "postgres://" in DATABASE_URL:
+    # DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://")
+    PGVECTOR_DB_URL = os.environ.get("PGVECTOR_DB_URL", DATABASE_URL)
+    if VECTOR_DB == "pgvector" and not PGVECTOR_DB_URL.startswith("postgres"):
+        raise ValueError(
+            "Pgvector requires setting PGVECTOR_DB_URL or using Postgres with vector extension as the primary database."
+        )
+
+if "postgres://" in DATABASE_URL:
+    PGVECTOR_INITIALIZE_MAX_VECTOR_LENGTH = int(
+        os.environ.get("PGVECTOR_INITIALIZE_MAX_VECTOR_LENGTH", "1536")
     )
-# PGVECTOR_INITIALIZE_MAX_VECTOR_LENGTH = int(
-#     os.environ.get("PGVECTOR_INITIALIZE_MAX_VECTOR_LENGTH", "1536")
-# )
 
 
 ####################################

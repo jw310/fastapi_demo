@@ -1,35 +1,30 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 from contextlib import contextmanager
 
-from llm.env import SQLALCHEMY_DATABASE_URL
+from llm.env import DATABASE_URL, TEST_DATABASE_URL
 
 # 建立 SQLAlchemy 的 database URL
-# SQLite3
-SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL
-# PostgreSQL
-# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:5432/TodoApplicationDatabase"
-# MySQL
-# SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:12341234!@127.0.0.1:3306/TodoApplicationDatabase"
+DATABASE_URL = DATABASE_URL
+
+if os.getenv("SWITCH_TEST_DATABASE") == "true":
+    DATABASE_URL = TEST_DATABASE_URL
 
 # 建立 engine
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    # 建立 engine echo 在 cmd 上顯示所有執行的過程
-    echo=False
-)
-
-# if "sqlite" in SQLALCHEMY_DATABASE_URL:
-#     # 預設 SQLite 只允許一個線程連線，為了防止不同線程同時存取 database
-#     engine = create_engine(
-#         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-#     )
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL,
+        # 預設 SQLite 只允許一個線程連線，為了防止不同線程同時存取 database
+        connect_args={"check_same_thread": False},
+        # 建立 engine echo 在 cmd 上顯示所有執行的過程
+        echo=False
+    )
 # else:
 #     if DATABASE_POOL_SIZE > 0:
 #         engine = create_engine(
-#             SQLALCHEMY_DATABASE_URL,
+#             DATABASE_URL,
 #             pool_size=DATABASE_POOL_SIZE,
 #             max_overflow=DATABASE_POOL_MAX_OVERFLOW,
 #             pool_timeout=DATABASE_POOL_TIMEOUT,
@@ -39,7 +34,7 @@ engine = create_engine(
 #         )
 #     else:
 #         engine = create_engine(
-#             SQLALCHEMY_DATABASE_URL, pool_pre_ping=True, poolclass=NullPool
+#             DATABASE_URL, pool_pre_ping=True, poolclass=NullPool
 #         )
 
 # 與資料庫建立 session
