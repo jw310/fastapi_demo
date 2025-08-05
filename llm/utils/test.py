@@ -4,7 +4,7 @@ from llm.retrieval.vector.embedding import get_embedding
 
 # print('test')
 
-qclient = connection('test')
+# qclient = connection('test')
 
 # 1. load data
 
@@ -29,9 +29,9 @@ data_objs = [
 
 # embeddings = get_embedding(sentences)
 
-embeddings_array = []
-for text in data_objs:
-    embeddings_array.append(get_embedding(text['lyric']))
+# embeddings_array = []
+# for text in data_objs:
+#     embeddings_array.append(get_embedding(text['lyric']))
 
 # print(f"embeddings: {embeddings_array}")
 

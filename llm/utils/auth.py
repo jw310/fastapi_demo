@@ -34,7 +34,7 @@ async def authenticate_user(username: str, password: str):
     user = await Users.findByName(username)
     if not user:
         return False
-    # # bcrypt 會自動將 password 加密後比對
+    # bcrypt 會自動將 password 加密後比對
     if not bcrypt_context.verify(password, user.hashed_password):
         return False
     return user
@@ -66,8 +66,46 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         user_id: str = payload.get("sub")
         user_role: str = payload.get("role")
 
+        token_is_expired = await get_token_remaining_time(token)
+        print(token_is_expired)
+
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
         return { 'username': username, 'id': user_id, 'user_role': user_role }
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="JWT Invalid authentication credentials")
+
+# check token expired
+async def check_token_expired(token: Annotated[str, Depends(oauth2_bearer)]):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        now = datetime.now()
+        now_timestamp = int(now.timestamp())
+        expires = payload.get("exp")
+
+        if expires is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+        return now_timestamp > expires
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="JWT Invalid authentication credentials")
+
+async def get_token_remaining_time(token: Annotated[str, Depends(oauth2_bearer)]):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        now = datetime.now()
+        expires = payload.get("exp")
+        now1 = now.strftime("%Y-%m-%d %H:%M:%S")
+        expires1 = datetime.fromtimestamp(expires)
+
+        print("Now:", now1)
+        print("Expires1:", expires1)
+
+        # remaining_time = now1 - expires1
+
+        # if expires is None:
+        #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+        # return remaining_time
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="JWT Invalid authentication credentials")
+
+# refresh token

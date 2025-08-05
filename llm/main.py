@@ -43,7 +43,7 @@ log = init_logging()
 # from llm.utils.google_cloud_storage import *
 
 ### 執行測試檔 ###
-from llm.utils.test import *
+# from llm.utils.test import *
 
 # from llm.utils.transcribe_speech import pipe
 # print(pipe)

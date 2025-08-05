@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from llm.utils.auth import get_current_user
+from llm.utils.auth import get_current_user, check_token_expired
 from llm.utils.newHTTPException import NewHTTPException
 
 from llm.models.user import (Users, CreateUserRequest)
