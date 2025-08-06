@@ -45,13 +45,13 @@ async def login_for_access_token(
     token = await create_token_pair(user.username, user.id, user.role)
 
     return {
-        'access_token': token['access_token'],
-        'refresh_token': token['refresh_token'],
-        'token_type': token['token_type'],
+        'access_token': token["access_token"],
+        'refresh_token': token["refresh_token"],
+        'token_type': token["token_type"],
     }
 
 @router.post("/refresh")
-async def refresh_for_access_token(token: Annotated[str, Depends(oauth2_bearer)]):
+async def refresh_for_access_token(refresh_data: RefreshRequest):
     """
     Refresh token with the following information:
 
@@ -59,12 +59,12 @@ async def refresh_for_access_token(token: Annotated[str, Depends(oauth2_bearer)]
 
     """
 
-    print(token)
-    # if not token:
-        # raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+    print(refresh_data)
+    if not refresh_data:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
 
-    # payload = await verify_refresh_token(refresh_request)
-    # print(payload)
+    payload = await verify_refresh_token(refresh_data.refresh_token)
+    print(payload)
 
     return {
         'a': 'a'
