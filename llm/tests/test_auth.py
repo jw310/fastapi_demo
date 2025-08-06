@@ -7,7 +7,7 @@ from jose import jwt
 from llm.tests.utils import app, override_get_db, test_user
 from llm.database import get_db
 from llm.utils.auth import authenticate_user, create_access_token, get_current_user
-from llm.env import SECRET_KEY, ALGORITHM
+from llm.env import ACCESS_TOKEN_SECRET_KEY, ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM
 
 # 覆寫 db 的 原本 dependency
 app.dependency_overrides[get_db] = override_get_db
@@ -30,11 +30,11 @@ async def test_create_access_token_authenticated():
     username = 'test'
     user_id = '1'
     role = 'user'
-    expires_delta = timedelta(days=1)
+    expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     token = await create_access_token(username, user_id, role, expires_delta)
 
-    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={'verifty_signature': False})
+    decoded_token = jwt.decode(token, ACCESS_TOKEN_SECRET_KEY, algorithms=[ALGORITHM], options={'verifty_signature': False})
 
     assert decoded_token['name'] == username
     assert decoded_token['sub'] == user_id
@@ -48,7 +48,7 @@ async def test_get_current_user_valid_token():
         "role": "admin"
     }
 
-    token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(encode, ACCESS_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
     user = await get_current_user(token)
     assert user == {'username': 'test', 'id': '1', 'user_role': 'admin'}
 
@@ -56,7 +56,7 @@ async def test_get_current_user_valid_token():
 async def test_get_current_user_missing_payload():
     encode = {'role': 'user'}
 
-    token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(encode, ACCESS_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
     # If an exception occurs, get HTTPException for comparison
     with pytest.raises(HTTPException) as excinfo:
         await get_current_user(token=token)

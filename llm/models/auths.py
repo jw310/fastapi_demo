@@ -28,6 +28,18 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+####################
+# Response
+####################
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
 # 透過 Depends 注入 db，建立 Session
 # 一個 db 的 dependency，可以看做是要操作的 db，這裡的 Depends 對應 get_db， get_db 對應 SessionLocal
 db_dependency = Annotated[Session, Depends(get_db)]

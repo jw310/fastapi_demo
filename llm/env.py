@@ -108,7 +108,10 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 ####################################
 # JWT
 ####################################
-SECRET_KEY = os.getenv("SECRET_KEY")
+ACCESS_TOKEN_SECRET_KEY = os.getenv("ACCESS_TOKEN_SECRET_KEY")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1))
+REFRESH_TOKEN_SECRET_KEY = os.getenv("REFRESH_TOKEN_SECRET_KEY")
+REFRESH_TOKEN_EXPIRE_MINUTES = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", 1))
 ALGORITHM = os.getenv("JWT_ALGORITHM")
 
 ####################################
