@@ -69,7 +69,7 @@ async def create_llm_system_prompt(user: user_dependency, request: CreateSystemR
 
     if request.provider == LLMProvider.OPENAI:
         result = await call_openai(request.system_message,
-            request.model or 'gpt-4.1-nano',
+            request.model or 'gpt-5-mini',
             temperature=request.temperature,
             max_tokens=request.max_tokens
         )
@@ -108,7 +108,7 @@ async def get_llm_providers(user: user_dependency):
         "message": "Success",
         "providers": [provider.value for provider in LLMProvider],
         "models": {
-            "openai": ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini", "gpt-4.1-nano"],
+            "openai": ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini", "gpt-4.1-nano", "gpt-5", "gpt-5-mini", "gpt-5-nano"],
             "claude": ["claude-3-sonnet-20240229", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"],
             "gemini": ["gemini-pro", "gemini-pro-vision"],
         }
