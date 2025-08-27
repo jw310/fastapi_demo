@@ -12,6 +12,15 @@ DATABASE_URL = DATABASE_URL
 if os.getenv("SWITCH_TEST_DATABASE") == "true":
     DATABASE_URL = TEST_DATABASE_URL
 
+# def get_sqlalchemy_db_url() -> str:
+#     db_user = DB_USERNAME
+#     db_pass = DB_PASSWORD
+#     db_host = DB_HOST
+#     db_port = DB_PORT
+#     db_name = DB_NAME
+#     sqlalchemy_db_url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+#     return sqlalchemy_db_url
+
 # 建立 engine
 if "sqlite" in DATABASE_URL:
     engine = create_engine(
